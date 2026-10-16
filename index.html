@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>คำนวณคอลลิเมเตอร์ + spatial filter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF1F4;--panel:#FFFFFF;--ink:#16212B;--muted:#5B6B79;--rule:#CCD5DD;--laser:#D7263D;--glass:#3A7CA5;--ok:#2E7D4F;--warn:#9A5B00;--bad:#B3261E;--chip:#E3E9EE;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F151B;--panel:#17202A;--ink:#E4EAF0;--muted:#93A3B1;--rule:#2A3642;--laser:#FF5A6E;--glass:#7FB3D5;--ok:#6CC08B;--warn:#E3A84A;--bad:#F28B82;--chip:#22303C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0F151B;--panel:#17202A;--ink:#E4EAF0;--muted:#93A3B1;--rule:#2A3642;--laser:#FF5A6E;--glass:#7FB3D5;--ok:#6CC08B;--warn:#E3A84A;--bad:#F28B82;--chip:#22303C;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai","IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.6}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;font-weight:600;margin:4px 0 2px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 16px;font-size:.95rem}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px}
+.bench{overflow-x:auto}
+.bench svg,.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.grid{display:grid;gap:16px;margin-top:16px}
+@media(min-width:820px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}}
+h2{font-size:1.05rem;font-weight:600;margin:0 0 10px}
+.field{padding:8px 0;border-top:1px solid var(--rule)}
+.field:first-of-type{border-top:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.row label{font-size:.95rem}
+.row label small{color:var(--muted)}
+.num{display:flex;align-items:center;gap:6px}
+.num input{width:86px;padding:5px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem;text-align:right}
+.num span{color:var(--muted);font-size:.85rem;min-width:28px}
+input[type=range]{width:100%;accent-color:var(--laser);margin:6px 0 0}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.presets button{font:inherit;font-size:.82rem;padding:3px 10px;border-radius:999px;border:1px solid var(--rule);background:var(--chip);color:var(--ink);cursor:pointer}
+.presets button:focus-visible,.btn:focus-visible,input:focus-visible{outline:2px solid var(--glass);outline-offset:2px}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td{padding:7px 0;border-top:1px solid var(--rule);vertical-align:top}
+tr:first-child td{border-top:0}
+td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;padding-left:10px}
+td small{display:block;color:var(--muted);font-size:.8rem;font-weight:400}
+.big{font-size:1.25rem}
+.status{margin-top:12px;padding:10px 12px;border-radius:8px;border:1px solid var(--rule);font-size:.92rem}
+.status b{font-weight:600}
+.s-ok b{color:var(--ok)}.s-warn b{color:var(--warn)}.s-bad b{color:var(--bad)}
+.chart{margin-top:16px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.btn{font:inherit;font-weight:500;padding:9px 16px;border-radius:8px;border:0;background:var(--ink);color:var(--bg);cursor:pointer}
+.note{color:var(--muted);font-size:.85rem}
+.eqs{display:grid;gap:14px;margin-top:6px}
+.eqs h3{font-size:.98rem;font-weight:600;margin:0 0 4px}
+.eqs p{margin:4px 0;color:var(--muted);font-size:.9rem;max-width:72ch}
+.f{font-family:"Cambria Math","STIX Two Math","Latin Modern Math","Times New Roman",serif;font-size:1.12rem;padding:8px 12px;background:var(--bg);border-radius:6px;overflow-x:auto;white-space:nowrap}
+.f i{font-style:italic}
+.ex{font-variant-numeric:tabular-nums;color:var(--ink);font-size:.9rem;margin-top:4px;overflow-x:auto;white-space:nowrap}
+.tips{margin:6px 0 0;padding-left:1.2em}
+.tips li{margin:6px 0;max-width:72ch}
+.foot{color:var(--muted);font-size:.82rem;margin-top:18px;max-width:72ch}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.lang{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden;flex:none;margin-top:6px}
+.lang button{font:inherit;font-size:.85rem;padding:4px 12px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.lang button:focus-visible{outline:2px solid var(--glass);outline-offset:-2px}
+</style>
+</head>
+<body>
+<main>
+<div class="top">
+  <div>
+    <h1 data-i="title"></h1>
+    <p class="sub" data-i="sub"></p>
+  </div>
+  <div class="lang" role="group" aria-label="Language">
+    <button type="button" data-lang="th" aria-pressed="true">ไทย</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+</div>
+
+<div class="panel bench" id="bench"></div>
+
+<div class="grid">
+  <section class="panel" aria-labelledby="h-in">
+    <h2 id="h-in" data-i="hIn"></h2>
+    <div id="fields"></div>
+  </section>
+  <section class="panel" aria-labelledby="h-out">
+    <h2 id="h-out" data-i="hOut"></h2>
+    <table id="results"></table>
+    <div id="phstatus" class="status"></div>
+  </section>
+</div>
+
+<div class="panel chart">
+  <h2 data-i="hChart"></h2>
+  <div id="chart" style="overflow-x:auto"></div>
+</div>
+
+<section class="panel" style="margin-top:16px" aria-labelledby="h-eq">
+  <h2 id="h-eq" data-i="hEq"></h2>
+  <p class="note" style="margin:0 0 8px" data-i="eqNote"></p>
+  <div class="eqs" id="eqs"></div>
+</section>
+
+<section class="panel" style="margin-top:16px" aria-labelledby="h-tip">
+  <h2 id="h-tip" data-i="hTip"></h2>
+  <ul class="tips" id="tips"></ul>
+</section>
+
+<div class="actions">
+  <button class="btn" id="dl" hidden data-i="dl"></button>
+  <span class="note" id="dlnote"></span>
+</div>
+
+<p class="foot" data-i="foot"></p>
+</main>
+
+<script>
+const S={
+th:{
+ title:'คำนวณคอลลิเมเตอร์ + spatial filter',
+ sub:'ปรับค่าเลเซอร์ เลนส์ และ pinhole แล้วดูขนาดบีมขาออกกับระยะที่บีมยังขนาน',
+ hIn:'ค่าที่ตั้ง',hOut:'ผลคำนวณ',hChart:'ขนาดบีมตามระยะทางหลัง L2',hEq:'สมการและที่มา',
+ eqNote:'ตัวเลขในแต่ละข้อแทนค่าตามที่ตั้งไว้ด้านบน และเปลี่ยนตามเมื่อปรับค่า',
+ hTip:'สิ่งที่ควรรู้ก่อนลงมือ',dl:'บันทึกเป็นไฟล์ SVG',
+ saved:'บันทึกไฟล์แล้ว',declined:'ยกเลิกการบันทึก',dlfail:'บันทึกไฟล์ไม่ได้ในมุมมองนี้',
+ foot:'สมมติบีมแบบเกาส์เซียน ขนาดบีมคือเส้นผ่านศูนย์กลางที่ 1/e² ค่า M² ใช้แทนคุณภาพบีม (He-Ne ≈ 1, ไดโอด 1.2–3) และ waist ขาออกอยู่ที่ L2 เมื่อปรับ L2 ไว้พอดี ขนาด pinhole ที่แนะนำใช้กฎ d ≈ 1.57 × จุดโฟกัส ซึ่งแสงผ่านได้ราว 99%',
+ f:{lam:['ความยาวคลื่น'],din:['ขนาดบีมเข้า','1/e²'],m2:['คุณภาพบีม M²'],pw:['กำลังเลเซอร์'],f1:['เลนส์ 1 (L1)','โฟกัสลง pinhole'],ph:['Pinhole'],f2:['เลนส์ 2 (L2)','คอลลิเมต'],dlens:['ขนาดเลนส์','Ø รูรับแสง'],L:['ระยะใช้งาน','หลัง L2']},
+ presets:['633 He-Ne','650 ไดโอดแดง','532 เขียว'],
+ focus:'จุดโฟกัส',benchFoot:(d,m)=>`ระยะ L1–L2 = ${d} mm   ขยาย ${m}×   (แนวตั้งขยายให้เห็นชัด ไม่ตามสเกล)`,
+ axis:'ระยะจาก L2 (m)',
+ rows:r=>[
+  ['ขนาดบีมคอลลิเมต','Ø ขาออก = Ø เข้า × f2/f1'],
+  ['ระยะที่ยังขนาน','2·z_R (บีมโตไม่เกิน √2 เท่า)'],
+  ['Rayleigh range z_R','π w² / (M² λ)'],
+  ['มุมบานเต็ม','2 M² λ / (π w)'],
+  ['Ø ที่ระยะใช้งาน '+P.L+' m',''],
+  ['จุดโฟกัสที่ pinhole','4 M² λ f1 / (π D)'],
+  ['แสงผ่าน pinhole','โดยประมาณ'],
+  ['Pinhole ที่แนะนำ','≈ 1.57 × จุดโฟกัส'],
+  ['แสงผ่านขอบเลนส์ L2','Ø เลนส์ '+P.dlens+' mm'],
+  ['กำลังขาออก','ไม่รวมการสะท้อนที่ผิวเลนส์'],
+  ['ระยะ L1 → pinhole → L2',''],
+  ['ความคลาดของตำแหน่ง L2','≈ ± z_R ของจุดโฟกัส (ใช้กับแกน z ของ pinhole ด้วย)'],
+  ['ความละเอียดปรับ pinhole แนวขวาง','≈ จุดโฟกัส / 5'],
+  ['ถ้าอยากให้ขนานตลอด '+P.L+' m','บีมขาออกที่เหมาะ / f2 ที่ควรใช้']],
+ phBad:(x,o)=>`<b>Pinhole เล็กเกินไป</b> (${x}× จุดโฟกัส) แสงผ่านน้อยและจะเห็นวงแหวน diffraction ลองใช้ประมาณ ${o} µm`,
+ phOk:x=>`<b>Pinhole ขนาดพอดี</b> (${x}× จุดโฟกัส) แสงผ่านดีและกรอง noise ได้`,
+ phWarn:(x,o)=>`<b>Pinhole ใหญ่กว่าที่ต้องการ</b> (${x}× จุดโฟกัส) แสงผ่านเต็ม แต่กรอง noise ได้น้อย ขนาดที่เหมาะประมาณ ${o} µm`,
+ lensSmall:m=>`<b style="color:var(--bad)">เลนส์เล็กเกินไป</b> ควรมี Ø อย่างน้อย 1.5–2 เท่าของบีมขาออก (≥ ${m} mm) ไม่อย่างนั้นขอบเลนส์จะตัดบีมและเกิดวงแหวน`,
+ eq:[
+  ['1. บีมเกาส์เซียน','บีมเลเซอร์มีเอว (waist) รัศมี w₀ ที่เล็กที่สุด แล้วค่อยๆ บานออก ระยะที่บีมโตขึ้น √2 เท่าเรียก Rayleigh range','M² = 1 คือบีมเกาส์เซียนสมบูรณ์ ค่ามากขึ้นแปลว่าบีมบานเร็วขึ้น M² เท่า'],
+  ['2. จุดโฟกัสที่ pinhole','เลนส์ L1 รวมบีมขนานขนาด D ลงเป็นจุดเล็กที่ระยะ f₁'],
+  ['3. แสงผ่าน pinhole','สัดส่วนกำลังของบีมเกาส์เซียนที่ผ่านรูกลมรัศมี a',(o)=>`pinhole ที่เหมาะ ≈ ${o} µm (T ≈ 99%) ส่วน noise ความถี่สูงจะโฟกัสออกนอกรูและถูกตัดทิ้ง`],
+  ['4. กำลังขยายของกล้องโทรทรรศน์ Kepler','L1 กับ L2 ห่างกัน f₁ + f₂ โดยใช้จุดโฟกัสร่วมกันที่ pinhole'],
+  ['5. ระยะที่บีมยังขนาน','waist ขาออกอยู่ที่ L2 รัศมี w₀ = D_out/2 บีมถือว่าขนานในช่วง ±z_R รอบ waist','ช่วงขนาน'],
+  ['6. มุมบานของบีม','ที่ระยะไกลกว่า z_R มาก บีมโตเป็นเส้นตรงตามมุมนี้',(d)=>`บีมโตขึ้น ≈ ${d} mm ทุก 1 m`],
+  ['7. ออกแบบย้อนกลับจากระยะใช้งาน L','ถ้าวาง waist ไว้กลางระยะ L บีมจะเล็กที่สุดตลอดช่วงเมื่อ z_R = L/2','ขนาดที่ปลายทั้งสองข้างโตเป็น √2 เท่า'],
+  ['8. ความแม่นในการวาง L2 และ pinhole','ตำแหน่งที่ยอมได้ตามแกนประมาณเท่ากับ Rayleigh range ของจุดโฟกัส ถ้าเลื่อนเกินนี้บีมขาออกจะลู่หรือบานจนเห็นชัด'],
+  ['9. ขนาดเลนส์','ขอบเลนส์เป็นรูรับแสงอีกตัวหนึ่ง ถ้าเล็กเกินจะตัดบีมและเกิดวงแหวน diffraction','แนะนำ']],
+ tips:[
+  '<b>วัดขนาดบีมเข้าจริงก่อน</b> เพราะทุกผลขึ้นกับค่า D และขนาดบีมยังเปลี่ยนตามระยะห่างจากเลเซอร์ วัดได้ด้วยกล้อง CCD / beam profiler หรือวิธี knife-edge (ระยะระหว่างจุดที่กำลังเหลือ 84% และ 16% คือรัศมี w)',
+  '<b>ทิศของเลนส์</b> ถ้าเป็น plano-convex ให้หันด้านนูนเข้าหาฝั่งที่บีมขนาน (L1 หันไปทางเลเซอร์ L2 หันไปทางบีมออก) จะลด spherical aberration ได้มาก ถ้ามี achromatic doublet ยิ่งดี',
+  '<b>เลเซอร์ไดโอด</b> บีมมักเป็นวงรีและมี astigmatism ให้ลองคำนวณแยกแกนกว้างและแกนแคบ หรือใช้ anamorphic prism ปรับให้กลมก่อนเข้า L1',
+  '<b>แสงสะท้อนกลับ</b> แสงที่สะท้อนจาก pinhole และผิวเลนส์กลับเข้าเลเซอร์ทำให้กำลังแกว่งได้ (โดยเฉพาะไดโอด) เอียงเลนส์เล็กน้อยหรือใช้ optical isolator',
+  '<b>ผิวเลนส์ไม่เคลือบ</b> สะท้อนประมาณ 4% ต่อผิว เลนส์สองตัวเสียรวมราว 15% ถ้าเคลือบ AR จะเหลือไม่ถึง 2%',
+  '<b>ความปลอดภัย</b> ที่จุดโฟกัสหน้า pinhole ความเข้มแสงสูงมาก และบีมขนานยังอันตรายต่อตาในระยะไกล ใส่แว่นตามความยาวคลื่น ทำงานให้บีมต่ำกว่าระดับสายตา และระวังแสงสะท้อนจากเครื่องมือโลหะ',
+  '<b>ระยะที่ใช้งานได้จริง</b> สั้นกว่าค่าทางทฤษฎีเสมอ เพราะความแม่นของตำแหน่ง L2 และคุณภาพเลนส์ ใช้ค่าความคลาดเคลื่อนของ L2 ในตารางเป็นตัวบอกว่าต้องใช้ stage ละเอียดแค่ไหน'],
+ ex:{laser:'เลเซอร์',optics:'L1 / pinhole / L2',dout:'ขนาดบีมคอลลิเมต',mag:'ขยาย',range:'ระยะที่ยังขนาน (2 z_R)',div:'มุมบานเต็ม',at:'Ø ที่',spot:'จุดโฟกัส / pinhole แนะนำ',trans:'แสงผ่าน',pout:'กำลังขาออก (ไม่รวมผิวเลนส์)',from:'จาก',tol:'ความคลาดตำแหน่ง L2',res:'ผลคำนวณ'}
+},
+en:{
+ title:'Collimator + spatial filter calculator',
+ sub:'Set the laser, lenses and pinhole to see the collimated beam size and how far it stays collimated',
+ hIn:'Inputs',hOut:'Results',hChart:'Beam size vs distance after L2',hEq:'Equations and where they come from',
+ eqNote:'Each equation is filled in with the values above and updates as you change them',
+ hTip:'Things to know before you build',dl:'Save as SVG file',
+ saved:'File saved',declined:'Save cancelled',dlfail:'Saving is not available in this view',
+ foot:'Assumes a Gaussian beam; beam size is the 1/e² diameter. M² describes beam quality (He-Ne ≈ 1, diode 1.2–3), and the output waist sits at L2 when L2 is set correctly. The recommended pinhole uses d ≈ 1.57 × focal spot, which passes about 99% of the light.',
+ f:{lam:['Wavelength'],din:['Input beam size','1/e²'],m2:['Beam quality M²'],pw:['Laser power'],f1:['Lens 1 (L1)','focuses onto pinhole'],ph:['Pinhole'],f2:['Lens 2 (L2)','collimating'],dlens:['Lens size','clear aperture Ø'],L:['Working distance','after L2']},
+ presets:['633 He-Ne','650 red diode','532 green'],
+ focus:'Focal spot',benchFoot:(d,m)=>`L1–L2 = ${d} mm   magnification ${m}×   (vertical scale exaggerated)`,
+ axis:'Distance from L2 (m)',
+ rows:r=>[
+  ['Collimated beam size','Ø out = Ø in × f2/f1'],
+  ['Collimated range','2·z_R (beam grows ≤ √2)'],
+  ['Rayleigh range z_R','π w² / (M² λ)'],
+  ['Full divergence','2 M² λ / (π w)'],
+  ['Ø at working distance '+P.L+' m',''],
+  ['Focal spot at pinhole','4 M² λ f1 / (π D)'],
+  ['Pinhole transmission','approximate'],
+  ['Recommended pinhole','≈ 1.57 × focal spot'],
+  ['Transmission through L2 aperture','lens Ø '+P.dlens+' mm'],
+  ['Output power','excluding lens surface reflections'],
+  ['Spacing L1 → pinhole → L2',''],
+  ['L2 position tolerance','≈ ± z_R of focal spot (also pinhole z)'],
+  ['Pinhole lateral adjustment resolution','≈ focal spot / 5'],
+  ['To stay collimated over '+P.L+' m','ideal output beam / f2 to use']],
+ phBad:(x,o)=>`<b>Pinhole too small</b> (${x}× focal spot): low transmission and visible diffraction rings. Try about ${o} µm.`,
+ phOk:x=>`<b>Pinhole size is right</b> (${x}× focal spot): good transmission and noise filtering.`,
+ phWarn:(x,o)=>`<b>Pinhole larger than needed</b> (${x}× focal spot): full transmission but weak noise filtering. Ideal is about ${o} µm.`,
+ lensSmall:m=>`<b style="color:var(--bad)">Lens too small</b>: aperture should be at least 1.5–2× the output beam (≥ ${m} mm), otherwise the lens edge clips the beam and adds rings.`,
+ eq:[
+  ['1. Gaussian beam','A laser beam has a narrowest point, the waist of radius w₀, and then slowly spreads. The distance over which it grows by √2 is the Rayleigh range.','M² = 1 is a perfect Gaussian; larger values mean the beam spreads M² times faster.'],
+  ['2. Focal spot at the pinhole','L1 focuses the collimated input beam of size D to a small spot at distance f₁.'],
+  ['3. Pinhole transmission','Fraction of a Gaussian beam’s power passing a circular hole of radius a.',(o)=>`ideal pinhole ≈ ${o} µm (T ≈ 99%); high-frequency noise focuses outside the hole and is blocked`],
+  ['4. Keplerian telescope magnification','L1 and L2 are f₁ + f₂ apart and share a common focus at the pinhole.'],
+  ['5. Collimated range','The output waist w₀ = D_out/2 sits at L2; the beam counts as collimated within ±z_R of the waist.','range'],
+  ['6. Beam divergence','Far beyond z_R the beam grows linearly at this angle.',(d)=>`beam grows ≈ ${d} mm per 1 m`],
+  ['7. Designing backwards from working distance L','With the waist at the middle of L, the beam stays smallest over the whole span when z_R = L/2.','the beam is √2 larger at both ends'],
+  ['8. How precisely to place L2 and the pinhole','The allowed axial error is about the Rayleigh range of the focal spot; beyond this the output visibly converges or diverges.'],
+  ['9. Lens size','The lens rim is another aperture; if too small it clips the beam and causes diffraction rings.','recommended']],
+ tips:[
+  '<b>Measure the real input beam first.</b> Every result depends on D, and the beam size also changes with distance from the laser. Use a CCD camera / beam profiler or the knife-edge method (the distance between the 84% and 16% power points is the radius w).',
+  '<b>Lens orientation.</b> For plano-convex lenses, face the curved side toward the collimated beam (L1 toward the laser, L2 toward the output). This greatly reduces spherical aberration; achromatic doublets are even better.',
+  '<b>Diode lasers</b> usually have elliptical, astigmatic beams. Calculate the wide and narrow axes separately, or circularize with an anamorphic prism pair before L1.',
+  '<b>Back-reflections</b> from the pinhole and lens surfaces into the laser can make the power fluctuate (especially diodes). Tilt the lenses slightly or use an optical isolator.',
+  '<b>Uncoated lens surfaces</b> reflect about 4% each, so two lenses lose about 15% in total. With AR coating the loss drops below 2%.',
+  '<b>Safety.</b> The focus in front of the pinhole is very intense, and a collimated beam stays hazardous to the eye at long range. Wear goggles rated for the wavelength, keep the beam below eye level and watch for reflections from metal tools.',
+  '<b>Real working range</b> is always shorter than theory because of L2 placement accuracy and lens quality. Use the L2 tolerance in the table to choose how fine a stage you need.'],
+ ex:{laser:'Laser',optics:'L1 / pinhole / L2',dout:'Collimated beam size',mag:'magnification',range:'Collimated range (2 z_R)',div:'Full divergence',at:'Ø at',spot:'Focal spot / recommended pinhole',trans:'transmission',pout:'Output power (excl. lens surfaces)',from:'from',tol:'L2 position tolerance',res:'Results'}
+}};
+let LANG='th';
+try{const s=localStorage.getItem('collim-lang');if(s==='en'||s==='th')LANG=s}catch(e){}
+const t=()=>S[LANG];
+
+const P={lam:633,din:1.0,m2:1.0,pw:5,f1:50,f2:120,ph:100,dlens:25.4,L:5};
+const F=[
+ {k:'lam',u:'nm',min:400,max:1100,st:1,presets:[633,650,532]},
+ {k:'din',u:'mm',min:0.2,max:10,st:0.05},
+ {k:'m2',u:'',min:1,max:5,st:0.05},
+ {k:'pw',u:'mW',min:0.1,max:500,st:0.1},
+ {k:'f1',u:'mm',min:10,max:300,st:1},
+ {k:'ph',u:'µm',min:5,max:500,st:5},
+ {k:'f2',u:'mm',min:10,max:1000,st:1},
+ {k:'dlens',u:'mm',min:5,max:75,st:0.5},
+ {k:'L',u:'m',min:0.5,max:50,st:0.5}
+];
+const fmt=(x,d=2)=>{if(!isFinite(x))return '–';const a=Math.abs(x);if(a>=1000)return x.toFixed(0);if(a>=100)return x.toFixed(Math.min(d,1));return x.toFixed(d)};
+
+function calc(p){
+ const lam=p.lam*1e-6;
+ const spot=4*p.m2*lam*p.f1/(Math.PI*p.din);
+ const spotUm=spot*1000, wf=spot/2, a=p.ph/2000;
+ const T=1-Math.exp(-2*a*a/(wf*wf));
+ const ratio=p.ph/spotUm;
+ const phOpt=Math.max(5,Math.round(1.57*spotUm/5)*5);
+ const mag=p.f2/p.f1, dout=p.din*mag, w=dout/2;
+ const zR=Math.PI*w*w/(p.m2*lam)/1000;
+ const div=2*p.m2*lam/(Math.PI*w)*1000;
+ const Dat=z=>dout*Math.sqrt(1+(z/zR)**2);
+ const DL=Dat(p.L);
+ const tol=Math.PI*wf*wf/(p.m2*lam);
+ const wOpt=Math.sqrt(p.m2*lam*(p.L*1000)/(2*Math.PI));
+ const dOpt=2*wOpt, f2Opt=p.f1*dOpt/p.din;
+ const Tap=1-Math.exp(-2*(p.dlens/dout)**2);
+ const Pout=p.pw*T*Tap, lat=spotUm/5;
+ return {Tap,Pout,lat,spotUm,T,ratio,phOpt,mag,dout,zR,range:2*zR,div,Dat,DL,tol,dOpt,f2Opt};
+}
+
+const C={laser:'var(--laser)',glass:'var(--glass)',ink:'var(--ink)',muted:'var(--muted)',rule:'var(--rule)',font:'inherit'};
+const CX={laser:'#D7263D',glass:'#3A7CA5',ink:'#16212B',muted:'#5B6B79',rule:'#CCD5DD',font:"'IBM Plex Sans Thai','IBM Plex Sans',sans-serif"};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const T_=(x,y,s,c,o={})=>`<text x="${x}" y="${y}" style="fill:${c};font-family:${o.font||'inherit'};font-size:${o.size||13}px;${o.w?'font-weight:'+o.w+';':''}" text-anchor="${o.a||'middle'}">${esc(s)}</text>`;
+
+function bench(p,r,c,oy=0){
+ const W=720,cy=oy+130,x0=180,span=470;
+ let s1=span*p.f1/(p.f1+p.f2), s2=span-s1;
+ if(s1<36){s1=36;s2=span-36} if(s2<36){s2=36;s1=span-36}
+ const xL1=x0,xPH=x0+s1,xL2=x0+s1+s2,xEnd=W-12;
+ const k=64/Math.max(p.din,r.dout);
+ const hIn=Math.max(4,p.din*k),hOut=Math.max(4,r.dout*k);
+ const f=c.font,o={font:f};
+ let g='';
+ g+=`<rect x="20" y="${cy-20}" width="80" height="40" rx="4" style="fill:none;stroke:${c.ink};stroke-width:1.2"/>`;
+ g+=T_(60,cy+5,'Laser',c.ink,{font:f,w:500})+T_(60,cy+40,p.lam+' nm',c.muted,o);
+ g+=`<rect x="100" y="${cy-hIn/2}" width="${xL1-100}" height="${hIn}" style="fill:${c.laser};opacity:.55"/>`;
+ g+=`<polygon points="${xL1},${cy-hIn/2} ${xPH},${cy} ${xL1},${cy+hIn/2}" style="fill:${c.laser};opacity:.45"/>`;
+ g+=`<polygon points="${xPH},${cy} ${xL2},${cy-hOut/2} ${xL2},${cy+hOut/2}" style="fill:${c.laser};opacity:.35"/>`;
+ g+=`<rect x="${xL2}" y="${cy-hOut/2}" width="${xEnd-xL2}" height="${hOut}" style="fill:${c.laser};opacity:.55"/>`;
+ const lens=(x,h)=>`<ellipse cx="${x}" cy="${cy}" rx="6" ry="${h/2}" style="fill:${c.glass};fill-opacity:.25;stroke:${c.glass};stroke-width:1.3"/>`;
+ const h1=Math.max(hIn*1.5,30),h2=Math.max(hOut*1.3,30);
+ g+=lens(xL1,h1)+lens(xL2,h2);
+ g+=`<line x1="${xPH}" y1="${cy-28}" x2="${xPH}" y2="${cy-3}" style="stroke:${c.ink};stroke-width:3"/><line x1="${xPH}" y1="${cy+3}" x2="${xPH}" y2="${cy+28}" style="stroke:${c.ink};stroke-width:3"/>`;
+ const yb=cy+Math.max(h1,h2)/2+24;
+ g+=T_(xL1,yb,'L1',c.ink,{font:f,w:500})+T_(xL1,yb+17,'f '+p.f1,c.muted,o);
+ g+=T_(xPH,yb,'Pinhole',c.ink,{font:f,w:500})+T_(xPH,yb+17,p.ph+' µm',c.muted,o);
+ g+=T_(xL2,yb,'L2',c.ink,{font:f,w:500})+T_(xL2,yb+17,'f '+p.f2,c.muted,o);
+ const yd=oy+30;
+ const dim=(a,b,tx)=>`<line x1="${a}" y1="${yd}" x2="${b}" y2="${yd}" style="stroke:${c.muted};stroke-width:.8"/><line x1="${a}" y1="${yd-5}" x2="${a}" y2="${yd+5}" style="stroke:${c.muted};stroke-width:.8"/><line x1="${b}" y1="${yd-5}" x2="${b}" y2="${yd+5}" style="stroke:${c.muted};stroke-width:.8"/>`+T_((a+b)/2,yd-8,tx,c.muted,o);
+ g+=dim(xL1,xPH,p.f1+' mm')+dim(xPH,xL2,p.f2+' mm');
+ g+=T_(140,cy-hIn/2-10,'Ø '+fmt(p.din)+' mm',c.ink,o);
+ g+=T_((xL2+xEnd)/2,cy-hOut/2-10,'Ø '+fmt(r.dout)+' mm',c.ink,{font:f,w:600});
+ g+=T_(xPH,oy+64,t().focus+' Ø '+fmt(r.spotUm,0)+' µm',c.ink,o);
+ g+=T_(W/2,oy+258,t().benchFoot(p.f1+p.f2,fmt(r.mag)),c.muted,{font:f,size:12});
+ return g;
+}
+
+function chart(p,r,c,oy=0){
+ const W=720,H=230,l=58,rt=20,tp=oy+18,b=oy+H-38;
+ const zmax=Math.max(p.L*1.15,Math.min(r.range*1.5,200),1);
+ const Dmax=r.Dat(zmax)*1.08;
+ const X=z=>l+(z/zmax)*(W-l-rt), Y=d=>(tp+b)/2-(d/2)/(Dmax/2)*((b-tp)/2);
+ const f=c.font,o={font:f,size:12};
+ let g='',up=[],dn=[];const N=80;
+ for(let i=0;i<=N;i++){const z=zmax*i/N,d=r.Dat(z);up.push(`${X(z).toFixed(1)},${Y(d).toFixed(1)}`);dn.push(`${X(z).toFixed(1)},${Y(-d).toFixed(1)}`)}
+ g+=`<polygon points="${up.join(' ')} ${dn.reverse().join(' ')}" style="fill:${c.laser};opacity:.4"/>`;
+ g+=`<line x1="${l}" y1="${(tp+b)/2}" x2="${W-rt}" y2="${(tp+b)/2}" style="stroke:${c.rule};stroke-width:1;stroke-dasharray:3 4"/>`;
+ g+=`<line x1="${l}" y1="${b}" x2="${W-rt}" y2="${b}" style="stroke:${c.muted};stroke-width:.8"/><line x1="${l}" y1="${tp}" x2="${l}" y2="${b}" style="stroke:${c.muted};stroke-width:.8"/>`;
+ const steps=[0.5,1,2,5,10,20,50,100];const step=steps[steps.findIndex(s=>zmax/s<=8)]||200;
+ for(let z=0;z<=zmax+1e-9;z+=step){g+=`<line x1="${X(z)}" y1="${b}" x2="${X(z)}" y2="${b+4}" style="stroke:${c.muted}"/>`+T_(X(z),b+18,fmt(z,z<1?1:0),c.muted,o)}
+ g+=T_((l+W-rt)/2,b+34,t().axis,c.muted,o);
+ g+=T_(l-6,Y(Dmax/1.08)+4,'±'+fmt(Dmax/1.08/2)+' mm',c.muted,{font:f,size:11,a:'end'});
+ g+=T_(l-6,(tp+b)/2+4,'0',c.muted,{font:f,size:11,a:'end'});
+ if(r.zR<zmax){const x=X(r.zR);g+=`<line x1="${x}" y1="${tp}" x2="${x}" y2="${b}" style="stroke:${c.glass};stroke-width:1.2;stroke-dasharray:5 4"/>`+T_(x+4,tp+12,'z_R '+fmt(r.zR,1)+' m',c.glass,{font:f,size:12,a:'start'})}
+ const xL=X(p.L);g+=`<line x1="${xL}" y1="${tp}" x2="${xL}" y2="${b}" style="stroke:${c.ink};stroke-width:1.4"/>`+T_(xL-4,b-8,'L '+p.L+' m: Ø '+fmt(r.DL)+' mm',c.ink,{font:f,size:12,a:'end'});
+ return g;
+}
+
+function buildFields(){
+ const box=document.getElementById('fields');box.innerHTML='';
+ F.forEach(f=>{
+  const [lab,sub]=t().f[f.k];
+  const d=document.createElement('div');d.className='field';
+  d.innerHTML=`<div class="row"><label for="n-${f.k}">${lab}${sub?` <small>(${sub})</small>`:''}</label><div class="num"><input id="n-${f.k}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.st}" value="${P[f.k]}"><span>${f.u}</span></div></div><input type="range" aria-label="${lab}" min="${f.min}" max="${f.max}" step="${f.st}" value="${Math.min(f.max,Math.max(f.min,P[f.k]))}">`+(f.presets?`<div class="presets">${f.presets.map((v,i)=>`<button type="button" data-v="${v}">${t().presets[i]}</button>`).join('')}</div>`:'');
+  box.appendChild(d);
+  const n=d.querySelector('input[type=number]'),rg=d.querySelector('input[type=range]');
+  const set=(v,src)=>{v=parseFloat(v);if(!isFinite(v)||v<=0)return;P[f.k]=v;if(src!==n)n.value=v;if(src!==rg)rg.value=Math.min(f.max,Math.max(f.min,v));render()};
+  n.addEventListener('input',()=>set(n.value,n));
+  rg.addEventListener('input',()=>set(rg.value,rg));
+  d.querySelectorAll('.presets button').forEach(b=>b.addEventListener('click',()=>set(b.dataset.v,null)));
+ });
+}
+
+function render(){
+ const r=calc(P),L=t();
+ document.getElementById('bench').innerHTML=`<svg viewBox="0 0 720 270" role="img" aria-label="${L.title}">${bench(P,r,C)}</svg>`;
+ document.getElementById('chart').innerHTML=`<svg viewBox="0 0 720 230" role="img" aria-label="${L.hChart}">${chart(P,r,C)}</svg>`;
+ const vals=[[fmt(r.dout)+' mm',1],[fmt(r.range,1)+' m',1],[fmt(r.zR,2)+' m'],[fmt(r.div,3)+' mrad'],[fmt(r.DL)+' mm'],[fmt(r.spotUm,1)+' µm'],[fmt(r.T*100,1)+' %'],[r.phOpt+' µm'],[fmt(r.Tap*100,1)+' %'],[fmt(r.Pout,2)+' mW'],[P.f1+' + '+P.f2+' = '+(P.f1+P.f2)+' mm'],['± '+fmt(r.tol,2)+' mm'],['~ '+fmt(r.lat,0)+' µm'],['Ø '+fmt(r.dOpt)+' mm / f2 ≈ '+fmt(r.f2Opt,0)+' mm']];
+ document.getElementById('results').innerHTML=L.rows(r).map(([a,s],i)=>`<tr><td>${a}${s?`<small>${s}</small>`:''}</td><td class="${vals[i][1]?'big':''}">${vals[i][0]}</td></tr>`).join('');
+ const st=document.getElementById('phstatus'),x=fmt(r.ratio,1);
+ let cls,msg;
+ if(r.ratio<1.2){cls='s-bad';msg=L.phBad(x,r.phOpt)}else if(r.ratio<=2.2){cls='s-ok';msg=L.phOk(x)}else{cls='s-warn';msg=L.phWarn(x,r.phOpt)}
+ if(P.dlens<1.5*r.dout)msg+='<br>'+L.lensSmall(fmt(1.5*r.dout,1));
+ st.className='status '+cls;st.innerHTML=msg;
+ renderEq(r);
+}
+
+function renderEq(r){
+ const e=t().eq,lam=P.lam+'×10⁻⁶ mm';
+ const F_=[
+  ['<i>w</i>(<i>z</i>) = <i>w</i><sub>0</sub> √(1 + (<i>z</i>/<i>z</i><sub>R</sub>)<sup>2</sup>) ,&nbsp;&nbsp; <i>z</i><sub>R</sub> = π<i>w</i><sub>0</sub><sup>2</sup> / (<i>M</i><sup>2</sup><i>λ</i>)', e[0][2]],
+  ['2<i>w</i><sub>f</sub> = 4<i>M</i><sup>2</sup><i>λ f</i><sub>1</sub> / (π<i>D</i><sub>in</sub>)', `= 4 × ${fmt(P.m2)} × ${lam} × ${P.f1} mm / (π × ${fmt(P.din)} mm) = ${fmt(r.spotUm,1)} µm`],
+  ['<i>T</i> = 1 − exp(−2<i>a</i><sup>2</sup> / <i>w</i><sub>f</sub><sup>2</sup>) ,&nbsp;&nbsp; <i>d</i><sub>pinhole</sub> ≈ <i>λ f</i><sub>1</sub> / (<i>D</i><sub>in</sub>/2) ≈ 1.57 × 2<i>w</i><sub>f</sub>', `a = ${P.ph/2} µm, w_f = ${fmt(r.spotUm/2,1)} µm → T = ${fmt(r.T*100,2)}%  |  ${e[2][2](r.phOpt)}`],
+  ['<i>M</i><sub>T</sub> = <i>f</i><sub>2</sub> / <i>f</i><sub>1</sub> ,&nbsp;&nbsp; <i>D</i><sub>out</sub> = <i>M</i><sub>T</sub> · <i>D</i><sub>in</sub>', `= ${P.f2}/${P.f1} = ${fmt(r.mag)}× → D_out = ${fmt(r.mag)} × ${fmt(P.din)} = ${fmt(r.dout)} mm`],
+  [`<i>z</i><sub>R</sub> = π(<i>D</i><sub>out</sub>/2)<sup>2</sup> / (<i>M</i><sup>2</sup><i>λ</i>) ,&nbsp;&nbsp; ${e[4][2]} ≈ 2<i>z</i><sub>R</sub>`, `= π × (${fmt(r.dout/2,3)} mm)² / (${fmt(P.m2)} × ${lam}) = ${fmt(r.zR,2)} m → ${e[4][2]} ≈ ${fmt(r.range,1)} m`],
+  ['<i>θ</i><sub>full</sub> = 2<i>M</i><sup>2</sup><i>λ</i> / (π<i>w</i><sub>0</sub>)', `= 2 × ${fmt(P.m2)} × ${lam} / (π × ${fmt(r.dout/2,3)} mm) = ${fmt(r.div,3)} mrad (${e[5][2](fmt(r.div,2))})`],
+  ['<i>w</i><sub>0,opt</sub> = √(<i>M</i><sup>2</sup><i>λL</i> / 2π) ,&nbsp;&nbsp; <i>f</i><sub>2</sub> = <i>f</i><sub>1</sub> · 2<i>w</i><sub>0,opt</sub> / <i>D</i><sub>in</sub>', `L = ${P.L} m → D_opt = ${fmt(r.dOpt)} mm, f₂ ≈ ${fmt(r.f2Opt,0)} mm (${e[6][2]})`],
+  ['Δ<i>z</i> ≈ ± π<i>w</i><sub>f</sub><sup>2</sup> / (<i>M</i><sup>2</sup><i>λ</i>)', `= π × (${fmt(r.spotUm/2,1)} µm)² / (${fmt(P.m2)} × ${P.lam} nm) = ± ${fmt(r.tol,2)} mm`],
+  [`<i>T</i><sub>lens</sub> = 1 − exp(−2(<i>D</i><sub>lens</sub>/<i>D</i><sub>out</sub>)<sup>2</sup>) ,&nbsp;&nbsp; ${e[8][2]} <i>D</i><sub>lens</sub> ≥ 1.5–2 × <i>D</i><sub>out</sub>`, `= 1 − exp(−2 × (${P.dlens}/${fmt(r.dout)})²) = ${fmt(r.Tap*100,2)}%`]
+ ];
+ document.getElementById('eqs').innerHTML=e.map((q,i)=>`<div><h3>${q[0]}</h3><p>${q[1]}</p><div class="f">${F_[i][0]}</div><div class="ex">${F_[i][1]}</div></div>`).join('');
+}
+
+function exportSVG(){
+ const r=calc(P),W=720,x=t().ex;
+ const rows=[
+  [x.laser,P.lam+' nm, Ø '+fmt(P.din)+' mm, M² '+fmt(P.m2)+', '+P.pw+' mW'],
+  [x.optics,'f '+P.f1+' mm / '+P.ph+' µm / f '+P.f2+' mm'],
+  [x.dout,'Ø '+fmt(r.dout)+' mm ('+x.mag+' '+fmt(r.mag)+'×)'],
+  [x.range,fmt(r.range,1)+' m   (z_R '+fmt(r.zR,2)+' m)'],
+  [x.div,fmt(r.div,3)+' mrad'],
+  [x.at+' '+P.L+' m',fmt(r.DL)+' mm'],
+  [x.spot,fmt(r.spotUm,1)+' µm / '+r.phOpt+' µm  ('+x.trans+' '+fmt(r.T*100,1)+'%)'],
+  [x.pout,fmt(r.Pout,2)+' mW '+x.from+' '+P.pw+' mW'],
+  [x.tol,'± '+fmt(r.tol,2)+' mm']
+ ];
+ const ty=530;let tbl=T_(20,ty,x.res,CX.ink,{font:CX.font,size:15,w:600,a:'start'});
+ rows.forEach((rw,i)=>{const y=ty+28+i*24;tbl+=`<line x1="20" y1="${y-16}" x2="${W-20}" y2="${y-16}" style="stroke:${CX.rule};stroke-width:.8"/>`+T_(20,y,rw[0],CX.muted,{font:CX.font,a:'start'})+T_(W-20,y,rw[1],CX.ink,{font:CX.font,a:'end',w:500})});
+ const H=ty+28+rows.length*24+10;
+ return `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="${W}" height="${H}" style="fill:#FFFFFF"/>`+bench(P,r,CX,0)+T_(20,296,t().hChart,CX.ink,{font:CX.font,size:15,w:600,a:'start'})+chart(P,r,CX,290)+tbl+`</svg>`;
+}
+
+function applyLang(){
+ const L=t();
+ document.documentElement.lang=LANG;document.title=L.title;
+ document.querySelectorAll('[data-i]').forEach(el=>{el.textContent=L[el.dataset.i]});
+ document.getElementById('tips').innerHTML=L.tips.map(s=>`<li>${s}</li>`).join('');
+ document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
+ document.getElementById('dlnote').textContent='';
+ buildFields();render();
+}
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>{LANG=b.dataset.lang;try{localStorage.setItem('collim-lang',LANG)}catch(e){}applyLang()}));
+applyLang();
+
+let dl=null;
+const btn=document.getElementById('dl'),note=document.getElementById('dlnote');
+const plainSave=data=>{const u=URL.createObjectURL(new Blob([data],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=u;a.download=`collimator_f${P.f1}_f${P.f2}_ph${P.ph}_${LANG}.svg`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
+if(window.claude&&claude.use){claude.use('downloads').then(v=>{dl=v;btn.hidden=!v}).catch(()=>{})}else{btn.hidden=false}
+btn.addEventListener('click',async()=>{
+ note.textContent='';
+ if(!dl){try{plainSave(exportSVG());note.textContent=t().saved}catch(e){note.textContent=t().dlfail}return}
+ try{await dl.save({filename:`collimator_f${P.f1}_f${P.f2}_ph${P.ph}_${LANG}.svg`,data:exportSVG()});note.textContent=t().saved}
+ catch(e){note.textContent=e&&e.code==='declined'?t().declined:t().dlfail}
+});
+</script>
+</body>
+</html>
