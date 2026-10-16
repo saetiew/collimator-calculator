@@ -125,16 +125,20 @@ th:{
  eqNote:'ตัวเลขในแต่ละข้อแทนค่าตามที่ตั้งไว้ด้านบน และเปลี่ยนตามเมื่อปรับค่า',
  hTip:'สิ่งที่ควรรู้ก่อนลงมือ',dl:'บันทึกเป็นไฟล์ SVG',
  saved:'บันทึกไฟล์แล้ว',declined:'ยกเลิกการบันทึก',dlfail:'บันทึกไฟล์ไม่ได้ในมุมมองนี้',
- foot:'สมมติบีมแบบเกาส์เซียน ขนาดบีมคือเส้นผ่านศูนย์กลางที่ 1/e² ค่า M² ใช้แทนคุณภาพบีม (He-Ne ≈ 1, ไดโอด 1.2–3) และ waist ขาออกอยู่ที่ L2 เมื่อปรับ L2 ไว้พอดี ขนาด pinhole ที่แนะนำใช้กฎ d ≈ 1.57 × จุดโฟกัส ซึ่งแสงผ่านได้ราว 99%',
- f:{lam:['ความยาวคลื่น'],din:['ขนาดบีมเข้า','1/e²'],m2:['คุณภาพบีม M²'],pw:['กำลังเลเซอร์'],f1:['เลนส์ 1 (L1)','โฟกัสลง pinhole'],ph:['Pinhole'],f2:['เลนส์ 2 (L2)','คอลลิเมต'],dlens:['ขนาดเลนส์','Ø รูรับแสง'],L:['ระยะใช้งาน','หลัง L2']},
+ foot:'สมมติบีมแบบเกาส์เซียน ขนาดบีมคือเส้นผ่านศูนย์กลางที่ 1/e² ค่า M² ใช้แทนคุณภาพบีม (He-Ne ≈ 1, ไดโอด 1.2–3) เมื่อ L2 ห่าง pinhole เท่ากับ f₂ พอดี (δ = 0) waist ขาออกจะอยู่ที่ระยะ f₂ หลัง L2 ซึ่งใกล้ L2 มากเมื่อเทียบกับระยะใช้งาน ถ้าเลื่อน L2 ออก (δ > 0) waist จะย้ายไปข้างหน้า คำนวณตามสูตรการส่งบีมเกาส์เซียนผ่านเลนส์บาง ขนาด pinhole ที่แนะนำใช้กฎ d ≈ 1.57 × จุดโฟกัส ซึ่งแสงผ่านได้ราว 99%',
+ f:{lam:['ความยาวคลื่น'],din:['ขนาดบีมเข้า','1/e²'],m2:['คุณภาพบีม M²'],pw:['กำลังเลเซอร์'],f1:['เลนส์ 1 (L1)','โฟกัสลง pinhole'],ph:['Pinhole'],f2:['เลนส์ 2 (L2)','คอลลิเมต'],dz:['เลื่อน L2 (δ)','ห่าง pinhole เกิน f₂'],dlens:['ขนาดเลนส์','Ø รูรับแสง'],L:['ระยะใช้งาน','หลัง L2']},
  presets:['633 He-Ne','650 ไดโอดแดง','532 เขียว'],
+ optBtn:'ให้ waist อยู่กลางระยะใช้งาน',zeroBtn:'δ = 0 (ไม่เลื่อน)',
  focus:'จุดโฟกัส',benchFoot:(d,m)=>`ระยะ L1–L2 = ${d} mm   ขยาย ${m}×   (แนวตั้งขยายให้เห็นชัด ไม่ตามสเกล)`,
+ waistAt:(d,z)=>`waist Ø ${d} mm ที่ ${z} m →`,
  axis:'ระยะจาก L2 (m)',
+ cRange:'ขนาน',cWaist:'waist',cLimit:'√2 × Ø คอลลิเมต',cNom:'เส้นประ: ไม่เลื่อน L2 (δ = 0)',
  rows:r=>[
   ['ขนาดบีมคอลลิเมต','Ø ขาออก = Ø เข้า × f2/f1'],
-  ['ระยะที่ยังขนาน','2·z_R (บีมโตไม่เกิน √2 เท่า)'],
-  ['Rayleigh range z_R','π w² / (M² λ)'],
-  ['มุมบานเต็ม','2 M² λ / (π w)'],
+  ['ระยะที่ยังขนาน','จาก L2 จนบีมโตเกิน √2 × Ø คอลลิเมต'],
+  ['ตำแหน่ง waist ขาออก','ระยะจาก L2 · Ø ที่ waist'],
+  ['Rayleigh range z_R','ของบีมขาออก π w₀² / (M² λ)'],
+  ['มุมบานเต็ม','2 M² λ / (π w₀)'],
   ['Ø ที่ระยะใช้งาน '+P.L+' m',''],
   ['จุดโฟกัสที่ pinhole','4 M² λ f1 / (π D)'],
   ['แสงผ่าน pinhole','โดยประมาณ'],
@@ -144,7 +148,8 @@ th:{
   ['ระยะ L1 → pinhole → L2',''],
   ['ความคลาดของตำแหน่ง L2','≈ ± z_R ของจุดโฟกัส (ใช้กับแกน z ของ pinhole ด้วย)'],
   ['ความละเอียดปรับ pinhole แนวขวาง','≈ จุดโฟกัส / 5'],
-  ['ถ้าอยากให้ขนานตลอด '+P.L+' m','บีมขาออกที่เหมาะ / f2 ที่ควรใช้']],
+  ['ถ้าอยากให้ขนานตลอด '+P.L+' m','บีมขาออกที่เหมาะ / f2 ที่ควรใช้'],
+  ['เลื่อน L2 ให้ waist อยู่กลาง '+P.L+' m','ใช้ f2 เดิม · Ø ใหญ่สุดในช่วง 0–'+P.L+' m']],
  phBad:(x,o)=>`<b>Pinhole เล็กเกินไป</b> (${x}× จุดโฟกัส) แสงผ่านน้อยและจะเห็นวงแหวน diffraction ลองใช้ประมาณ ${o} µm`,
  phOk:x=>`<b>Pinhole ขนาดพอดี</b> (${x}× จุดโฟกัส) แสงผ่านดีและกรอง noise ได้`,
  phWarn:(x,o)=>`<b>Pinhole ใหญ่กว่าที่ต้องการ</b> (${x}× จุดโฟกัส) แสงผ่านเต็ม แต่กรอง noise ได้น้อย ขนาดที่เหมาะประมาณ ${o} µm`,
@@ -154,11 +159,12 @@ th:{
   ['2. จุดโฟกัสที่ pinhole','เลนส์ L1 รวมบีมขนานขนาด D ลงเป็นจุดเล็กที่ระยะ f₁'],
   ['3. แสงผ่าน pinhole','สัดส่วนกำลังของบีมเกาส์เซียนที่ผ่านรูกลมรัศมี a',(o)=>`pinhole ที่เหมาะ ≈ ${o} µm (T ≈ 99%) ส่วน noise ความถี่สูงจะโฟกัสออกนอกรูและถูกตัดทิ้ง`],
   ['4. กำลังขยายของกล้องโทรทรรศน์ Kepler','L1 กับ L2 ห่างกัน f₁ + f₂ โดยใช้จุดโฟกัสร่วมกันที่ pinhole'],
-  ['5. ระยะที่บีมยังขนาน','waist ขาออกอยู่ที่ L2 รัศมี w₀ = D_out/2 บีมถือว่าขนานในช่วง ±z_R รอบ waist','ช่วงขนาน'],
-  ['6. มุมบานของบีม','ที่ระยะไกลกว่า z_R มาก บีมโตเป็นเส้นตรงตามมุมนี้',(d)=>`บีมโตขึ้น ≈ ${d} mm ทุก 1 m`],
+  ['5. ระยะที่บีมยังขนาน','นับจาก L2 จนบีมโตเกิน √2 เท่าของขนาดคอลลิเมต D_out ถ้าไม่เลื่อน L2 (δ = 0) waist อยู่ใกล้ L2 จึงได้ระยะราว z_R เท่านั้น ไม่ใช่ 2z_R','ช่วงขนาน'],
+  ['6. มุมบานของบีม','ที่ระยะไกลกว่า z_R มาก บีมโตเป็นเส้นตรงตามมุมนี้ (w₀ คือรัศมีที่ waist ขาออก)',(d)=>`บีมโตขึ้น ≈ ${d} mm ทุก 1 m`],
   ['7. ออกแบบย้อนกลับจากระยะใช้งาน L','ถ้าวาง waist ไว้กลางระยะ L บีมจะเล็กที่สุดตลอดช่วงเมื่อ z_R = L/2','ขนาดที่ปลายทั้งสองข้างโตเป็น √2 เท่า'],
   ['8. ความแม่นในการวาง L2 และ pinhole','ตำแหน่งที่ยอมได้ตามแกนประมาณเท่ากับ Rayleigh range ของจุดโฟกัส ถ้าเลื่อนเกินนี้บีมขาออกจะลู่หรือบานจนเห็นชัด'],
-  ['9. ขนาดเลนส์','ขอบเลนส์เป็นรูรับแสงอีกตัวหนึ่ง ถ้าเล็กเกินจะตัดบีมและเกิดวงแหวน diffraction','แนะนำ']],
+  ['9. ขนาดเลนส์','ขอบเลนส์เป็นรูรับแสงอีกตัวหนึ่ง ถ้าเล็กเกินจะตัดบีมและเกิดวงแหวน diffraction','แนะนำ'],
+  ['10. เลื่อน L2 เพื่อย้าย waist ไปข้างหน้า','ถ้าเลื่อน L2 ออกห่าง pinhole อีก δ บีมขาออกจะลู่เข้าเล็กน้อยจนถึง waist แล้วค่อยบาน จึงใช้ช่วงก่อนถึง waist ได้ด้วย waist ไปได้ไกลสุดเมื่อ δ = z_Rf (Rayleigh range ของจุดโฟกัส) ถ้าเลื่อนเกินนั้น waist จะกลับเข้ามาใกล้และเล็กลง (กลายเป็นโฟกัส)',(d,D,L)=>`waist กลางระยะ ${L} m: δ = ${d} mm → Ø ≤ ${D} mm ตลอดช่วง`,'ไกลสุด']],
  tips:[
   '<b>วัดขนาดบีมเข้าจริงก่อน</b> เพราะทุกผลขึ้นกับค่า D และขนาดบีมยังเปลี่ยนตามระยะห่างจากเลเซอร์ วัดได้ด้วยกล้อง CCD / beam profiler หรือวิธี knife-edge (ระยะระหว่างจุดที่กำลังเหลือ 84% และ 16% คือรัศมี w)',
   '<b>ทิศของเลนส์</b> ถ้าเป็น plano-convex ให้หันด้านนูนเข้าหาฝั่งที่บีมขนาน (L1 หันไปทางเลเซอร์ L2 หันไปทางบีมออก) จะลด spherical aberration ได้มาก ถ้ามี achromatic doublet ยิ่งดี',
@@ -166,8 +172,9 @@ th:{
   '<b>แสงสะท้อนกลับ</b> แสงที่สะท้อนจาก pinhole และผิวเลนส์กลับเข้าเลเซอร์ทำให้กำลังแกว่งได้ (โดยเฉพาะไดโอด) เอียงเลนส์เล็กน้อยหรือใช้ optical isolator',
   '<b>ผิวเลนส์ไม่เคลือบ</b> สะท้อนประมาณ 4% ต่อผิว เลนส์สองตัวเสียรวมราว 15% ถ้าเคลือบ AR จะเหลือไม่ถึง 2%',
   '<b>ความปลอดภัย</b> ที่จุดโฟกัสหน้า pinhole ความเข้มแสงสูงมาก และบีมขนานยังอันตรายต่อตาในระยะไกล ใส่แว่นตามความยาวคลื่น ทำงานให้บีมต่ำกว่าระดับสายตา และระวังแสงสะท้อนจากเครื่องมือโลหะ',
-  '<b>ระยะที่ใช้งานได้จริง</b> สั้นกว่าค่าทางทฤษฎีเสมอ เพราะความแม่นของตำแหน่ง L2 และคุณภาพเลนส์ ใช้ค่าความคลาดเคลื่อนของ L2 ในตารางเป็นตัวบอกว่าต้องใช้ stage ละเอียดแค่ไหน'],
- ex:{laser:'เลเซอร์',optics:'L1 / pinhole / L2',dout:'ขนาดบีมคอลลิเมต',mag:'ขยาย',range:'ระยะที่ยังขนาน (2 z_R)',div:'มุมบานเต็ม',at:'Ø ที่',spot:'จุดโฟกัส / pinhole แนะนำ',trans:'แสงผ่าน',pout:'กำลังขาออก (ไม่รวมผิวเลนส์)',from:'จาก',tol:'ความคลาดตำแหน่ง L2',res:'ผลคำนวณ'}
+  '<b>ระยะที่ใช้งานได้จริง</b> สั้นกว่าค่าทางทฤษฎีเสมอ เพราะความแม่นของตำแหน่ง L2 และคุณภาพเลนส์ ใช้ค่าความคลาดเคลื่อนของ L2 ในตารางเป็นตัวบอกว่าต้องใช้ stage ละเอียดแค่ไหน',
+  '<b>จูน waist ให้อยู่กลางระยะใช้งาน</b> ตั้ง L2 ให้บีมขนานก่อน แล้ววัดขนาดบีมที่ใกล้ L2 และที่ปลายระยะใช้งาน ค่อยๆ เลื่อน L2 ออกห่าง pinhole จนขนาดสองจุดเท่ากัน ระยะที่ต้องเลื่อนอยู่ระดับมิลลิเมตร จึงควรวาง L2 บน stage แกน z ที่ปรับละเอียดได้ราว 0.1 mm'],
+ ex:{laser:'เลเซอร์',optics:'L1 / pinhole / L2',dout:'ขนาดบีมคอลลิเมต',mag:'ขยาย',range:'ระยะที่ยังขนาน (≤ √2 × Ø)',waist:'waist ขาออก',shift:'เลื่อน L2',div:'มุมบานเต็ม',at:'Ø ที่',spot:'จุดโฟกัส / pinhole แนะนำ',trans:'แสงผ่าน',pout:'กำลังขาออก (ไม่รวมผิวเลนส์)',from:'จาก',tol:'ความคลาดตำแหน่ง L2',res:'ผลคำนวณ'}
 },
 en:{
  title:'Collimator + spatial filter calculator',
@@ -176,16 +183,20 @@ en:{
  eqNote:'Each equation is filled in with the values above and updates as you change them',
  hTip:'Things to know before you build',dl:'Save as SVG file',
  saved:'File saved',declined:'Save cancelled',dlfail:'Saving is not available in this view',
- foot:'Assumes a Gaussian beam; beam size is the 1/e² diameter. M² describes beam quality (He-Ne ≈ 1, diode 1.2–3), and the output waist sits at L2 when L2 is set correctly. The recommended pinhole uses d ≈ 1.57 × focal spot, which passes about 99% of the light.',
- f:{lam:['Wavelength'],din:['Input beam size','1/e²'],m2:['Beam quality M²'],pw:['Laser power'],f1:['Lens 1 (L1)','focuses onto pinhole'],ph:['Pinhole'],f2:['Lens 2 (L2)','collimating'],dlens:['Lens size','clear aperture Ø'],L:['Working distance','after L2']},
+ foot:'Assumes a Gaussian beam; beam size is the 1/e² diameter. M² describes beam quality (He-Ne ≈ 1, diode 1.2–3), With L2 exactly f₂ from the pinhole (δ = 0) the output waist lies f₂ after L2, which is very close to L2 compared with the working distance; shifting L2 outward (δ > 0) moves the waist downstream (thin-lens Gaussian beam transformation). The recommended pinhole uses d ≈ 1.57 × focal spot, which passes about 99% of the light.',
+ f:{lam:['Wavelength'],din:['Input beam size','1/e²'],m2:['Beam quality M²'],pw:['Laser power'],f1:['Lens 1 (L1)','focuses onto pinhole'],ph:['Pinhole'],f2:['Lens 2 (L2)','collimating'],dz:['L2 shift δ','extra distance beyond f₂'],dlens:['Lens size','clear aperture Ø'],L:['Working distance','after L2']},
  presets:['633 He-Ne','650 red diode','532 green'],
+ optBtn:'Put waist mid working distance',zeroBtn:'δ = 0 (no shift)',
  focus:'Focal spot',benchFoot:(d,m)=>`L1–L2 = ${d} mm   magnification ${m}×   (vertical scale exaggerated)`,
+ waistAt:(d,z)=>`waist Ø ${d} mm at ${z} m →`,
  axis:'Distance from L2 (m)',
+ cRange:'collimated',cWaist:'waist',cLimit:'√2 × collimated Ø',cNom:'dashed: L2 not shifted (δ = 0)',
  rows:r=>[
   ['Collimated beam size','Ø out = Ø in × f2/f1'],
-  ['Collimated range','2·z_R (beam grows ≤ √2)'],
-  ['Rayleigh range z_R','π w² / (M² λ)'],
-  ['Full divergence','2 M² λ / (π w)'],
+  ['Collimated range','from L2 until the beam exceeds √2 × collimated Ø'],
+  ['Output waist position','distance from L2 · Ø at waist'],
+  ['Rayleigh range z_R','of output beam, π w₀² / (M² λ)'],
+  ['Full divergence','2 M² λ / (π w₀)'],
   ['Ø at working distance '+P.L+' m',''],
   ['Focal spot at pinhole','4 M² λ f1 / (π D)'],
   ['Pinhole transmission','approximate'],
@@ -195,7 +206,8 @@ en:{
   ['Spacing L1 → pinhole → L2',''],
   ['L2 position tolerance','≈ ± z_R of focal spot (also pinhole z)'],
   ['Pinhole lateral adjustment resolution','≈ focal spot / 5'],
-  ['To stay collimated over '+P.L+' m','ideal output beam / f2 to use']],
+  ['To stay collimated over '+P.L+' m','ideal output beam / f2 to use'],
+  ['Shift L2 to put the waist mid '+P.L+' m','same f2 · largest Ø over 0–'+P.L+' m']],
  phBad:(x,o)=>`<b>Pinhole too small</b> (${x}× focal spot): low transmission and visible diffraction rings. Try about ${o} µm.`,
  phOk:x=>`<b>Pinhole size is right</b> (${x}× focal spot): good transmission and noise filtering.`,
  phWarn:(x,o)=>`<b>Pinhole larger than needed</b> (${x}× focal spot): full transmission but weak noise filtering. Ideal is about ${o} µm.`,
@@ -205,11 +217,12 @@ en:{
   ['2. Focal spot at the pinhole','L1 focuses the collimated input beam of size D to a small spot at distance f₁.'],
   ['3. Pinhole transmission','Fraction of a Gaussian beam’s power passing a circular hole of radius a.',(o)=>`ideal pinhole ≈ ${o} µm (T ≈ 99%); high-frequency noise focuses outside the hole and is blocked`],
   ['4. Keplerian telescope magnification','L1 and L2 are f₁ + f₂ apart and share a common focus at the pinhole.'],
-  ['5. Collimated range','The output waist w₀ = D_out/2 sits at L2; the beam counts as collimated within ±z_R of the waist.','range'],
-  ['6. Beam divergence','Far beyond z_R the beam grows linearly at this angle.',(d)=>`beam grows ≈ ${d} mm per 1 m`],
+  ['5. Collimated range','Measured from L2 until the beam exceeds √2 × the collimated size D_out. Without an L2 shift (δ = 0) the waist sits near L2, so the range is only about z_R, not 2z_R.','range'],
+  ['6. Beam divergence','Far beyond z_R the beam grows linearly at this angle (w₀ is the output waist radius).',(d)=>`beam grows ≈ ${d} mm per 1 m`],
   ['7. Designing backwards from working distance L','With the waist at the middle of L, the beam stays smallest over the whole span when z_R = L/2.','the beam is √2 larger at both ends'],
   ['8. How precisely to place L2 and the pinhole','The allowed axial error is about the Rayleigh range of the focal spot; beyond this the output visibly converges or diverges.'],
-  ['9. Lens size','The lens rim is another aperture; if too small it clips the beam and causes diffraction rings.','recommended']],
+  ['9. Lens size','The lens rim is another aperture; if too small it clips the beam and causes diffraction rings.','recommended'],
+  ['10. Shifting L2 to move the waist downstream','Moving L2 a distance δ further from the pinhole makes the output converge slightly to a waist and then spread, so the stretch before the waist is usable too. The waist is farthest at δ = z_Rf (Rayleigh range of the focal spot); shifting more brings it back closer and smaller (focusing).',(d,D,L)=>`waist mid ${L} m: δ = ${d} mm → Ø ≤ ${D} mm over the whole span`,'farthest']],
  tips:[
   '<b>Measure the real input beam first.</b> Every result depends on D, and the beam size also changes with distance from the laser. Use a CCD camera / beam profiler or the knife-edge method (the distance between the 84% and 16% power points is the radius w).',
   '<b>Lens orientation.</b> For plano-convex lenses, face the curved side toward the collimated beam (L1 toward the laser, L2 toward the output). This greatly reduces spherical aberration; achromatic doublets are even better.',
@@ -217,14 +230,15 @@ en:{
   '<b>Back-reflections</b> from the pinhole and lens surfaces into the laser can make the power fluctuate (especially diodes). Tilt the lenses slightly or use an optical isolator.',
   '<b>Uncoated lens surfaces</b> reflect about 4% each, so two lenses lose about 15% in total. With AR coating the loss drops below 2%.',
   '<b>Safety.</b> The focus in front of the pinhole is very intense, and a collimated beam stays hazardous to the eye at long range. Wear goggles rated for the wavelength, keep the beam below eye level and watch for reflections from metal tools.',
-  '<b>Real working range</b> is always shorter than theory because of L2 placement accuracy and lens quality. Use the L2 tolerance in the table to choose how fine a stage you need.'],
- ex:{laser:'Laser',optics:'L1 / pinhole / L2',dout:'Collimated beam size',mag:'magnification',range:'Collimated range (2 z_R)',div:'Full divergence',at:'Ø at',spot:'Focal spot / recommended pinhole',trans:'transmission',pout:'Output power (excl. lens surfaces)',from:'from',tol:'L2 position tolerance',res:'Results'}
+  '<b>Real working range</b> is always shorter than theory because of L2 placement accuracy and lens quality. Use the L2 tolerance in the table to choose how fine a stage you need.',
+  '<b>Tuning the waist to mid working distance.</b> Collimate first, then measure the beam near L2 and at the far end of the working distance. Move L2 away from the pinhole in small steps until both sizes match. The shift is on the millimetre scale, so mount L2 on a z stage with about 0.1 mm resolution.'],
+ ex:{laser:'Laser',optics:'L1 / pinhole / L2',dout:'Collimated beam size',mag:'magnification',range:'Collimated range (≤ √2 × Ø)',waist:'Output waist',shift:'L2 shift',div:'Full divergence',at:'Ø at',spot:'Focal spot / recommended pinhole',trans:'transmission',pout:'Output power (excl. lens surfaces)',from:'from',tol:'L2 position tolerance',res:'Results'}
 }};
 let LANG='th';
 try{const s=localStorage.getItem('collim-lang');if(s==='en'||s==='th')LANG=s}catch(e){}
 const t=()=>S[LANG];
 
-const P={lam:633,din:1.0,m2:1.0,pw:5,f1:50,f2:120,ph:100,dlens:25.4,L:5};
+const P={lam:633,din:1.0,m2:1.0,pw:5,f1:50,f2:120,ph:100,dz:0,dlens:25.4,L:5};
 const F=[
  {k:'lam',u:'nm',min:400,max:1100,st:1,presets:[633,650,532]},
  {k:'din',u:'mm',min:0.2,max:10,st:0.05},
@@ -233,6 +247,7 @@ const F=[
  {k:'f1',u:'mm',min:10,max:300,st:1},
  {k:'ph',u:'µm',min:5,max:500,st:5},
  {k:'f2',u:'mm',min:10,max:1000,st:1},
+ {k:'dz',u:'mm',min:-5,max:10,st:0.01,neg:true,acts:['opt','zero']},
  {k:'dlens',u:'mm',min:5,max:75,st:0.5},
  {k:'L',u:'m',min:0.5,max:50,st:0.5}
 ];
@@ -245,17 +260,29 @@ function calc(p){
  const T=1-Math.exp(-2*a*a/(wf*wf));
  const ratio=p.ph/spotUm;
  const phOpt=Math.max(5,Math.round(1.57*spotUm/5)*5);
- const mag=p.f2/p.f1, dout=p.din*mag, w=dout/2;
- const zR=Math.PI*w*w/(p.m2*lam)/1000;
- const div=2*p.m2*lam/(Math.PI*w)*1000;
- const Dat=z=>dout*Math.sqrt(1+(z/zR)**2);
- const DL=Dat(p.L);
+ const mag=p.f2/p.f1, dout=p.din*mag;
+ // Rayleigh range ของจุดโฟกัส = ระยะคลาดตามแกนที่ยอมได้ของ L2/pinhole (mm)
  const tol=Math.PI*wf*wf/(p.m2*lam);
+ // บีมเกาส์เซียนผ่านเลนส์บาง L2 (Self 1983): waist ขาเข้า (จุดโฟกัส) อยู่ห่าง L2 = f2 + δ
+ const out=d=>{const q=d*d+tol*tol,w0=wf*p.f2/Math.sqrt(q);
+  return {w0,zw:(p.f2+d*p.f2*p.f2/q)/1000,zR:Math.PI*w0*w0/(p.m2*lam)/1000}};
+ const o=out(p.dz||0), w0=o.w0, zw=o.zw, zR=o.zR;
+ const Dat=z=>2*w0*Math.sqrt(1+((z-zw)/zR)**2);
+ const nom=out(0), Dat0=z=>2*nom.w0*Math.sqrt(1+((z-nom.zw)/nom.zR)**2);
+ // ระยะที่ยังขนาน: จาก L2 จนบีมโตเกิน √2 × Ø คอลลิเมต (dout)
+ const k2=2*(dout/(2*w0))**2-1;
+ const range=k2>0?Math.max(0,zw+zR*Math.sqrt(k2)):0;
+ const div=2*p.m2*lam/(Math.PI*w0)*1000;
+ const dL2=Dat(0), DL=Dat(p.L);
+ const zwMax=(p.f2+p.f2*p.f2/(2*tol))/1000;
+ // δ ที่ทำให้ Ø ใหญ่สุดในช่วง 0–L เล็กที่สุด (ค่าสูงสุดอยู่ที่ปลายช่วงเสมอ)
+ let dzOpt=0,DmaxOpt=Infinity;
+ for(let i=0;i<=3000;i++){const d=3*tol*i/3000,b=out(d),far=Math.max(Math.abs(b.zw),Math.abs(p.L-b.zw)),m=2*b.w0*Math.sqrt(1+(far/b.zR)**2);if(m<DmaxOpt-1e-12){DmaxOpt=m;dzOpt=d}}
  const wOpt=Math.sqrt(p.m2*lam*(p.L*1000)/(2*Math.PI));
  const dOpt=2*wOpt, f2Opt=p.f1*dOpt/p.din;
- const Tap=1-Math.exp(-2*(p.dlens/dout)**2);
+ const Tap=1-Math.exp(-2*(p.dlens/dL2)**2);
  const Pout=p.pw*T*Tap, lat=spotUm/5;
- return {Tap,Pout,lat,spotUm,T,ratio,phOpt,mag,dout,zR,range:2*zR,div,Dat,DL,tol,dOpt,f2Opt};
+ return {Tap,Pout,lat,spotUm,wf,T,ratio,phOpt,mag,dout,dL2,w0,zw,zwMax,zR,range,div,Dat,Dat0,DL,tol,dOpt,f2Opt,dzOpt,DmaxOpt};
 }
 
 const C={laser:'var(--laser)',glass:'var(--glass)',ink:'var(--ink)',muted:'var(--muted)',rule:'var(--rule)',font:'inherit'};
@@ -268,8 +295,11 @@ function bench(p,r,c,oy=0){
  let s1=span*p.f1/(p.f1+p.f2), s2=span-s1;
  if(s1<36){s1=36;s2=span-36} if(s2<36){s2=36;s1=span-36}
  const xL1=x0,xPH=x0+s1,xL2=x0+s1+s2,xEnd=W-12;
- const k=64/Math.max(p.din,r.dout);
- const hIn=Math.max(4,p.din*k),hOut=Math.max(4,r.dout*k);
+ const k=64/Math.max(p.din,r.dL2);
+ const hIn=Math.max(4,p.din*k),hOut=Math.max(4,r.dL2*k);
+ const dz=p.dz||0;
+ // ปลายขวาของบีมขาออก: ลู่เข้าหา waist ถ้า δ > 0, บานออกถ้า δ < 0 (เชิงสัญลักษณ์)
+ const hEnd=dz>0.005?Math.max(hOut*0.45,hOut*2*r.w0/r.dL2):dz<-0.005?hOut*1.25:hOut;
  const f=c.font,o={font:f};
  let g='';
  g+=`<rect x="20" y="${cy-20}" width="80" height="40" rx="4" style="fill:none;stroke:${c.ink};stroke-width:1.2"/>`;
@@ -277,7 +307,7 @@ function bench(p,r,c,oy=0){
  g+=`<rect x="100" y="${cy-hIn/2}" width="${xL1-100}" height="${hIn}" style="fill:${c.laser};opacity:.55"/>`;
  g+=`<polygon points="${xL1},${cy-hIn/2} ${xPH},${cy} ${xL1},${cy+hIn/2}" style="fill:${c.laser};opacity:.45"/>`;
  g+=`<polygon points="${xPH},${cy} ${xL2},${cy-hOut/2} ${xL2},${cy+hOut/2}" style="fill:${c.laser};opacity:.35"/>`;
- g+=`<rect x="${xL2}" y="${cy-hOut/2}" width="${xEnd-xL2}" height="${hOut}" style="fill:${c.laser};opacity:.55"/>`;
+ g+=`<polygon points="${xL2},${cy-hOut/2} ${xEnd},${cy-hEnd/2} ${xEnd},${cy+hEnd/2} ${xL2},${cy+hOut/2}" style="fill:${c.laser};opacity:.55"/>`;
  const lens=(x,h)=>`<ellipse cx="${x}" cy="${cy}" rx="6" ry="${h/2}" style="fill:${c.glass};fill-opacity:.25;stroke:${c.glass};stroke-width:1.3"/>`;
  const h1=Math.max(hIn*1.5,30),h2=Math.max(hOut*1.3,30);
  g+=lens(xL1,h1)+lens(xL2,h2);
@@ -288,32 +318,41 @@ function bench(p,r,c,oy=0){
  g+=T_(xL2,yb,'L2',c.ink,{font:f,w:500})+T_(xL2,yb+17,'f '+p.f2,c.muted,o);
  const yd=oy+30;
  const dim=(a,b,tx)=>`<line x1="${a}" y1="${yd}" x2="${b}" y2="${yd}" style="stroke:${c.muted};stroke-width:.8"/><line x1="${a}" y1="${yd-5}" x2="${a}" y2="${yd+5}" style="stroke:${c.muted};stroke-width:.8"/><line x1="${b}" y1="${yd-5}" x2="${b}" y2="${yd+5}" style="stroke:${c.muted};stroke-width:.8"/>`+T_((a+b)/2,yd-8,tx,c.muted,o);
- g+=dim(xL1,xPH,p.f1+' mm')+dim(xPH,xL2,p.f2+' mm');
+ const f2lab=Math.abs(dz)<0.005?p.f2+' mm':`${p.f2} ${dz>0?'+':'−'} ${fmt(Math.abs(dz))} mm`;
+ g+=dim(xL1,xPH,p.f1+' mm')+dim(xPH,xL2,f2lab);
  g+=T_(140,cy-hIn/2-10,'Ø '+fmt(p.din)+' mm',c.ink,o);
- g+=T_((xL2+xEnd)/2,cy-hOut/2-10,'Ø '+fmt(r.dout)+' mm',c.ink,{font:f,w:600});
+ g+=T_((xL2+xEnd)/2,cy-hOut/2-10,'Ø '+fmt(r.dL2)+' mm',c.ink,{font:f,w:600});
  g+=T_(xPH,oy+64,t().focus+' Ø '+fmt(r.spotUm,0)+' µm',c.ink,o);
- g+=T_(W/2,oy+258,t().benchFoot(p.f1+p.f2,fmt(r.mag)),c.muted,{font:f,size:12});
+ if(dz>0.005&&r.zw>0)g+=T_(xEnd,oy+64,t().waistAt(fmt(2*r.w0),fmt(r.zw,2)),c.glass,{font:f,w:600,a:'end'});
+ g+=T_(W/2,oy+258,t().benchFoot(+(p.f1+p.f2+dz).toFixed(2),fmt(r.mag)),c.muted,{font:f,size:12});
  return g;
 }
 
 function chart(p,r,c,oy=0){
  const W=720,H=230,l=58,rt=20,tp=oy+18,b=oy+H-38;
- const zmax=Math.max(p.L*1.15,Math.min(r.range*1.5,200),1);
- const Dmax=r.Dat(zmax)*1.08;
+ const shifted=Math.abs(p.dz||0)>0.005, lim=Math.SQRT2*r.dout;
+ const zmax=Math.max(p.L*1.15,Math.min(Math.max(r.range,r.zw)*1.3,200),1);
+ const Dmax=Math.max(r.Dat(zmax),shifted?r.Dat0(zmax):0,lim)*1.08;
  const X=z=>l+(z/zmax)*(W-l-rt), Y=d=>(tp+b)/2-(d/2)/(Dmax/2)*((b-tp)/2);
  const f=c.font,o={font:f,size:12};
- let g='',up=[],dn=[];const N=80;
+ let g='',up=[],dn=[];const N=120;
  for(let i=0;i<=N;i++){const z=zmax*i/N,d=r.Dat(z);up.push(`${X(z).toFixed(1)},${Y(d).toFixed(1)}`);dn.push(`${X(z).toFixed(1)},${Y(-d).toFixed(1)}`)}
  g+=`<polygon points="${up.join(' ')} ${dn.reverse().join(' ')}" style="fill:${c.laser};opacity:.4"/>`;
+ if(shifted){let u0=[],d0=[];for(let i=0;i<=N;i++){const z=zmax*i/N,d=r.Dat0(z);u0.push(`${X(z).toFixed(1)},${Y(d).toFixed(1)}`);d0.push(`${X(z).toFixed(1)},${Y(-d).toFixed(1)}`)}
+  const ln=pts=>`<polyline points="${pts.join(' ')}" style="fill:none;stroke:${c.muted};stroke-width:1.2;stroke-dasharray:4 3"/>`;g+=ln(u0)+ln(d0)}
  g+=`<line x1="${l}" y1="${(tp+b)/2}" x2="${W-rt}" y2="${(tp+b)/2}" style="stroke:${c.rule};stroke-width:1;stroke-dasharray:3 4"/>`;
+ for(const s of [1,-1])g+=`<line x1="${l}" y1="${Y(s*lim)}" x2="${W-rt}" y2="${Y(s*lim)}" style="stroke:${c.muted};stroke-width:.8;stroke-dasharray:1 3"/>`;
+ g+=T_(W-rt-2,Y(lim)-4,t().cLimit,c.muted,{font:f,size:11,a:'end'});
  g+=`<line x1="${l}" y1="${b}" x2="${W-rt}" y2="${b}" style="stroke:${c.muted};stroke-width:.8"/><line x1="${l}" y1="${tp}" x2="${l}" y2="${b}" style="stroke:${c.muted};stroke-width:.8"/>`;
  const steps=[0.5,1,2,5,10,20,50,100];const step=steps[steps.findIndex(s=>zmax/s<=8)]||200;
  for(let z=0;z<=zmax+1e-9;z+=step){g+=`<line x1="${X(z)}" y1="${b}" x2="${X(z)}" y2="${b+4}" style="stroke:${c.muted}"/>`+T_(X(z),b+18,fmt(z,z<1?1:0),c.muted,o)}
  g+=T_((l+W-rt)/2,b+34,t().axis,c.muted,o);
  g+=T_(l-6,Y(Dmax/1.08)+4,'±'+fmt(Dmax/1.08/2)+' mm',c.muted,{font:f,size:11,a:'end'});
  g+=T_(l-6,(tp+b)/2+4,'0',c.muted,{font:f,size:11,a:'end'});
- if(r.zR<zmax){const x=X(r.zR);g+=`<line x1="${x}" y1="${tp}" x2="${x}" y2="${b}" style="stroke:${c.glass};stroke-width:1.2;stroke-dasharray:5 4"/>`+T_(x+4,tp+12,'z_R '+fmt(r.zR,1)+' m',c.glass,{font:f,size:12,a:'start'})}
+ if(r.zw>0.02*zmax&&r.zw<zmax){const x=X(r.zw);g+=`<line x1="${x}" y1="${Y(r.w0*2)}" x2="${x}" y2="${Y(-r.w0*2)}" style="stroke:${c.ink};stroke-width:1.4"/>`+T_(x,Y(-r.w0*2)+14,t().cWaist+' '+fmt(r.zw,2)+' m · Ø '+fmt(2*r.w0)+' mm',c.ink,{font:f,size:11})}
+ if(r.range>0&&r.range<zmax){const x=X(r.range);g+=`<line x1="${x}" y1="${tp}" x2="${x}" y2="${b}" style="stroke:${c.glass};stroke-width:1.2;stroke-dasharray:5 4"/>`+T_(x+4,tp+12,t().cRange+' '+fmt(r.range,1)+' m',c.glass,{font:f,size:12,a:'start'})}
  const xL=X(p.L);g+=`<line x1="${xL}" y1="${tp}" x2="${xL}" y2="${b}" style="stroke:${c.ink};stroke-width:1.4"/>`+T_(xL-4,b-8,'L '+p.L+' m: Ø '+fmt(r.DL)+' mm',c.ink,{font:f,size:12,a:'end'});
+ if(shifted)g+=T_(l+6,tp+12,t().cNom,c.muted,{font:f,size:11,a:'start'});
  return g;
 }
 
@@ -322,13 +361,14 @@ function buildFields(){
  F.forEach(f=>{
   const [lab,sub]=t().f[f.k];
   const d=document.createElement('div');d.className='field';
-  d.innerHTML=`<div class="row"><label for="n-${f.k}">${lab}${sub?` <small>(${sub})</small>`:''}</label><div class="num"><input id="n-${f.k}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.st}" value="${P[f.k]}"><span>${f.u}</span></div></div><input type="range" aria-label="${lab}" min="${f.min}" max="${f.max}" step="${f.st}" value="${Math.min(f.max,Math.max(f.min,P[f.k]))}">`+(f.presets?`<div class="presets">${f.presets.map((v,i)=>`<button type="button" data-v="${v}">${t().presets[i]}</button>`).join('')}</div>`:'');
+  d.innerHTML=`<div class="row"><label for="n-${f.k}">${lab}${sub?` <small>(${sub})</small>`:''}</label><div class="num"><input id="n-${f.k}" type="number" inputmode="decimal" min="${f.min}" max="${f.max}" step="${f.st}" value="${P[f.k]}"><span>${f.u}</span></div></div><input type="range" aria-label="${lab}" min="${f.min}" max="${f.max}" step="${f.st}" value="${Math.min(f.max,Math.max(f.min,P[f.k]))}">`+(f.presets?`<div class="presets">${f.presets.map((v,i)=>`<button type="button" data-v="${v}">${t().presets[i]}</button>`).join('')}</div>`:'')+(f.acts?`<div class="presets">${f.acts.map(a=>`<button type="button" data-act="${a}">${t()[a+'Btn']}</button>`).join('')}</div>`:'');
   box.appendChild(d);
   const n=d.querySelector('input[type=number]'),rg=d.querySelector('input[type=range]');
-  const set=(v,src)=>{v=parseFloat(v);if(!isFinite(v)||v<=0)return;P[f.k]=v;if(src!==n)n.value=v;if(src!==rg)rg.value=Math.min(f.max,Math.max(f.min,v));render()};
+  const set=(v,src)=>{v=parseFloat(v);if(!isFinite(v)||(!f.neg&&v<=0))return;P[f.k]=v;if(src!==n)n.value=v;if(src!==rg)rg.value=Math.min(f.max,Math.max(f.min,v));render()};
   n.addEventListener('input',()=>set(n.value,n));
   rg.addEventListener('input',()=>set(rg.value,rg));
-  d.querySelectorAll('.presets button').forEach(b=>b.addEventListener('click',()=>set(b.dataset.v,null)));
+  d.querySelectorAll('.presets button[data-v]').forEach(b=>b.addEventListener('click',()=>set(b.dataset.v,null)));
+  d.querySelectorAll('.presets button[data-act]').forEach(b=>b.addEventListener('click',()=>set(b.dataset.act==='opt'?calc(P).dzOpt.toFixed(2):0,null)));
  });
 }
 
@@ -336,12 +376,12 @@ function render(){
  const r=calc(P),L=t();
  document.getElementById('bench').innerHTML=`<svg viewBox="0 0 720 270" role="img" aria-label="${L.title}">${bench(P,r,C)}</svg>`;
  document.getElementById('chart').innerHTML=`<svg viewBox="0 0 720 230" role="img" aria-label="${L.hChart}">${chart(P,r,C)}</svg>`;
- const vals=[[fmt(r.dout)+' mm',1],[fmt(r.range,1)+' m',1],[fmt(r.zR,2)+' m'],[fmt(r.div,3)+' mrad'],[fmt(r.DL)+' mm'],[fmt(r.spotUm,1)+' µm'],[fmt(r.T*100,1)+' %'],[r.phOpt+' µm'],[fmt(r.Tap*100,1)+' %'],[fmt(r.Pout,2)+' mW'],[P.f1+' + '+P.f2+' = '+(P.f1+P.f2)+' mm'],['± '+fmt(r.tol,2)+' mm'],['~ '+fmt(r.lat,0)+' µm'],['Ø '+fmt(r.dOpt)+' mm / f2 ≈ '+fmt(r.f2Opt,0)+' mm']];
+ const vals=[[fmt(r.dout)+' mm',1],[fmt(r.range,1)+' m',1],[fmt(r.zw,2)+' m · Ø '+fmt(2*r.w0)+' mm'],[fmt(r.zR,2)+' m'],[fmt(r.div,3)+' mrad'],[fmt(r.DL)+' mm'],[fmt(r.spotUm,1)+' µm'],[fmt(r.T*100,1)+' %'],[r.phOpt+' µm'],[fmt(r.Tap*100,1)+' %'],[fmt(r.Pout,2)+' mW'],[P.f1+' + '+(+(P.f2+(P.dz||0)).toFixed(2))+' = '+(+(P.f1+P.f2+(P.dz||0)).toFixed(2))+' mm'],['± '+fmt(r.tol,2)+' mm'],['~ '+fmt(r.lat,0)+' µm'],['Ø '+fmt(r.dOpt)+' mm / f2 ≈ '+fmt(r.f2Opt,0)+' mm'],['δ = +'+fmt(r.dzOpt)+' mm → Ø ≤ '+fmt(r.DmaxOpt)+' mm']];
  document.getElementById('results').innerHTML=L.rows(r).map(([a,s],i)=>`<tr><td>${a}${s?`<small>${s}</small>`:''}</td><td class="${vals[i][1]?'big':''}">${vals[i][0]}</td></tr>`).join('');
  const st=document.getElementById('phstatus'),x=fmt(r.ratio,1);
  let cls,msg;
  if(r.ratio<1.2){cls='s-bad';msg=L.phBad(x,r.phOpt)}else if(r.ratio<=2.2){cls='s-ok';msg=L.phOk(x)}else{cls='s-warn';msg=L.phWarn(x,r.phOpt)}
- if(P.dlens<1.5*r.dout)msg+='<br>'+L.lensSmall(fmt(1.5*r.dout,1));
+ if(P.dlens<1.5*r.dL2)msg+='<br>'+L.lensSmall(fmt(1.5*r.dL2,1));
  st.className='status '+cls;st.innerHTML=msg;
  renderEq(r);
 }
@@ -353,11 +393,12 @@ function renderEq(r){
   ['2<i>w</i><sub>f</sub> = 4<i>M</i><sup>2</sup><i>λ f</i><sub>1</sub> / (π<i>D</i><sub>in</sub>)', `= 4 × ${fmt(P.m2)} × ${lam} × ${P.f1} mm / (π × ${fmt(P.din)} mm) = ${fmt(r.spotUm,1)} µm`],
   ['<i>T</i> = 1 − exp(−2<i>a</i><sup>2</sup> / <i>w</i><sub>f</sub><sup>2</sup>) ,&nbsp;&nbsp; <i>d</i><sub>pinhole</sub> ≈ <i>λ f</i><sub>1</sub> / (<i>D</i><sub>in</sub>/2) ≈ 1.57 × 2<i>w</i><sub>f</sub>', `a = ${P.ph/2} µm, w_f = ${fmt(r.spotUm/2,1)} µm → T = ${fmt(r.T*100,2)}%  |  ${e[2][2](r.phOpt)}`],
   ['<i>M</i><sub>T</sub> = <i>f</i><sub>2</sub> / <i>f</i><sub>1</sub> ,&nbsp;&nbsp; <i>D</i><sub>out</sub> = <i>M</i><sub>T</sub> · <i>D</i><sub>in</sub>', `= ${P.f2}/${P.f1} = ${fmt(r.mag)}× → D_out = ${fmt(r.mag)} × ${fmt(P.din)} = ${fmt(r.dout)} mm`],
-  [`<i>z</i><sub>R</sub> = π(<i>D</i><sub>out</sub>/2)<sup>2</sup> / (<i>M</i><sup>2</sup><i>λ</i>) ,&nbsp;&nbsp; ${e[4][2]} ≈ 2<i>z</i><sub>R</sub>`, `= π × (${fmt(r.dout/2,3)} mm)² / (${fmt(P.m2)} × ${lam}) = ${fmt(r.zR,2)} m → ${e[4][2]} ≈ ${fmt(r.range,1)} m`],
-  ['<i>θ</i><sub>full</sub> = 2<i>M</i><sup>2</sup><i>λ</i> / (π<i>w</i><sub>0</sub>)', `= 2 × ${fmt(P.m2)} × ${lam} / (π × ${fmt(r.dout/2,3)} mm) = ${fmt(r.div,3)} mrad (${e[5][2](fmt(r.div,2))})`],
+  ['<i>z</i><sub>R</sub> = π<i>w</i><sub>0</sub><sup>2</sup> / (<i>M</i><sup>2</sup><i>λ</i>) ,&nbsp;&nbsp; <i>z</i><sub>max</sub> = <i>z</i><sub>w</sub> + <i>z</i><sub>R</sub> √(2(<i>D</i><sub>out</sub> / 2<i>w</i><sub>0</sub>)<sup>2</sup> − 1)', `w₀ = ${fmt(r.w0,3)} mm, z_w = ${fmt(r.zw,2)} m → z_R = π × (${fmt(r.w0,3)} mm)² / (${fmt(P.m2)} × ${lam}) = ${fmt(r.zR,2)} m → ${e[4][2]} 0 – ${fmt(r.range,1)} m`],
+  ['<i>θ</i><sub>full</sub> = 2<i>M</i><sup>2</sup><i>λ</i> / (π<i>w</i><sub>0</sub>)', `= 2 × ${fmt(P.m2)} × ${lam} / (π × ${fmt(r.w0,3)} mm) = ${fmt(r.div,3)} mrad (${e[5][2](fmt(r.div,2))})`],
   ['<i>w</i><sub>0,opt</sub> = √(<i>M</i><sup>2</sup><i>λL</i> / 2π) ,&nbsp;&nbsp; <i>f</i><sub>2</sub> = <i>f</i><sub>1</sub> · 2<i>w</i><sub>0,opt</sub> / <i>D</i><sub>in</sub>', `L = ${P.L} m → D_opt = ${fmt(r.dOpt)} mm, f₂ ≈ ${fmt(r.f2Opt,0)} mm (${e[6][2]})`],
   ['Δ<i>z</i> ≈ ± π<i>w</i><sub>f</sub><sup>2</sup> / (<i>M</i><sup>2</sup><i>λ</i>)', `= π × (${fmt(r.spotUm/2,1)} µm)² / (${fmt(P.m2)} × ${P.lam} nm) = ± ${fmt(r.tol,2)} mm`],
-  [`<i>T</i><sub>lens</sub> = 1 − exp(−2(<i>D</i><sub>lens</sub>/<i>D</i><sub>out</sub>)<sup>2</sup>) ,&nbsp;&nbsp; ${e[8][2]} <i>D</i><sub>lens</sub> ≥ 1.5–2 × <i>D</i><sub>out</sub>`, `= 1 − exp(−2 × (${P.dlens}/${fmt(r.dout)})²) = ${fmt(r.Tap*100,2)}%`]
+  [`<i>T</i><sub>lens</sub> = 1 − exp(−2(<i>D</i><sub>lens</sub>/<i>D</i><sub>out</sub>)<sup>2</sup>) ,&nbsp;&nbsp; ${e[8][2]} <i>D</i><sub>lens</sub> ≥ 1.5–2 × <i>D</i><sub>out</sub>`, `= 1 − exp(−2 × (${P.dlens}/${fmt(r.dout)})²) = ${fmt(r.Tap*100,2)}%`],
+  ['<i>z</i><sub>w</sub> = <i>f</i><sub>2</sub> + δ<i>f</i><sub>2</sub><sup>2</sup> / (δ<sup>2</sup> + <i>z</i><sub>Rf</sub><sup>2</sup>) ,&nbsp;&nbsp; <i>w</i><sub>0</sub> = <i>w</i><sub>f</sub> <i>f</i><sub>2</sub> / √(δ<sup>2</sup> + <i>z</i><sub>Rf</sub><sup>2</sup>)', `z_Rf = ${fmt(r.tol,2)} mm, δ = ${fmt(P.dz||0)} mm → z_w = ${fmt(r.zw,2)} m, Ø waist = ${fmt(2*r.w0)} mm  |  ${e[9][3]} z_w = ${fmt(r.zwMax,2)} m (δ = ${fmt(r.tol,2)} mm)  |  ${e[9][2](fmt(r.dzOpt),fmt(r.DmaxOpt),P.L)}`]
  ];
  document.getElementById('eqs').innerHTML=e.map((q,i)=>`<div><h3>${q[0]}</h3><p>${q[1]}</p><div class="f">${F_[i][0]}</div><div class="ex">${F_[i][1]}</div></div>`).join('');
 }
@@ -367,8 +408,10 @@ function exportSVG(){
  const rows=[
   [x.laser,P.lam+' nm, Ø '+fmt(P.din)+' mm, M² '+fmt(P.m2)+', '+P.pw+' mW'],
   [x.optics,'f '+P.f1+' mm / '+P.ph+' µm / f '+P.f2+' mm'],
+  [x.shift,'δ = '+fmt(P.dz||0)+' mm'],
   [x.dout,'Ø '+fmt(r.dout)+' mm ('+x.mag+' '+fmt(r.mag)+'×)'],
   [x.range,fmt(r.range,1)+' m   (z_R '+fmt(r.zR,2)+' m)'],
+  [x.waist,'Ø '+fmt(2*r.w0)+' mm @ '+fmt(r.zw,2)+' m'],
   [x.div,fmt(r.div,3)+' mrad'],
   [x.at+' '+P.L+' m',fmt(r.DL)+' mm'],
   [x.spot,fmt(r.spotUm,1)+' µm / '+r.phOpt+' µm  ('+x.trans+' '+fmt(r.T*100,1)+'%)'],

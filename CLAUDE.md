@@ -31,11 +31,16 @@ equations with substituted values, and an "export as SVG" button.
 ## Rules when editing index.html
 - Keep it one self-contained file; do not add a framework or build tooling.
 - Every user-visible string lives in the `S` object with both `th` and `en` keys. Add new text to both.
-- Physics lives in `calc(p)`. Model: Gaussian beam with M² scaling, 1/e² diameters, output waist at L2.
-  - focal spot 2w_f = 4·M²·λ·f1 / (π·D_in)
+- Physics lives in `calc(p)`. Model: Gaussian beam with M² scaling, 1/e² diameters, thin-lens Gaussian
+  transformation at L2 (Self 1983). `p.dz` = δ, extra pinhole–L2 spacing beyond f2.
+  - focal spot 2w_f = 4·M²·λ·f1 / (π·D_in); z_Rf = π·w_f² / (M²λ) (= L2 / pinhole axial tolerance)
   - pinhole transmission T = 1 − exp(−2a²/w_f²); recommended pinhole ≈ 1.57 × focal spot
-  - D_out = D_in · f2/f1; z_R = π(D_out/2)² / (M²λ); collimated range ≈ 2·z_R
-  - L2 / pinhole axial tolerance ≈ π·w_f² / (M²λ)
+  - D_out = D_in · f2/f1 (nominal collimated size)
+  - output waist: w0 = w_f·f2 / √(δ² + z_Rf²), at z_w = f2 + δ·f2² / (δ² + z_Rf²) after L2; z_R = π·w0² / (M²λ)
+    (farthest waist at δ = z_Rf: z_w = f2 + f2²/(2·z_Rf))
+  - collimated range = distance from L2 until D(z) > √2 · D_out = z_w + z_R·√(2(D_out/2w0)² − 1).
+    Do not call it 2·z_R: with δ = 0 the waist is near L2, so the range is only ≈ z_R.
+  - `dzOpt`: δ that minimises the largest beam over 0–L (shown as the "waist mid working distance" button)
 - SVG export: `exportSVG()` uses fixed hex colours (CX) so the file looks right outside the page.
   The save button uses Claude's `downloads` capability when available and otherwise falls back
   to a normal browser Blob download (the path used on GitHub Pages). Keep both paths.
