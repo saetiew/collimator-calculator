@@ -39,7 +39,9 @@ equations with substituted values, and an "export as SVG" button.
   - output waist: w0 = w_f·f2 / √(δ² + z_Rf²), at z_w = f2 + δ·f2² / (δ² + z_Rf²) after L2; z_R = π·w0² / (M²λ)
     (farthest waist at δ = z_Rf: z_w = f2 + f2²/(2·z_Rf))
   - collimated range = distance from L2 until D(z) > √2 · D_out = z_w + z_R·√(2(D_out/2w0)² − 1).
-    Do not call it 2·z_R: with δ = 0 the waist is near L2, so the range is only ≈ z_R.
+    Do not call it 2·z_R: with δ = 0 the waist is at f2 after L2 (≈ at L2 on the metre scale), so the range is only ≈ z_R.
+    The chart and bench always label the waist ("= f₂" when δ = 0, "virtual waist … before L2" when z_w < 0).
+    δ is counted from the real focus (pinhole), not from L1.
   - `dzOpt`: δ that minimises the largest beam over 0–L (shown as the "waist mid working distance" button)
 - SVG export: `exportSVG()` uses fixed hex colours (CX) so the file looks right outside the page.
   The save button uses Claude's `downloads` capability when available and otherwise falls back

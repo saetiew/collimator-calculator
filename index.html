@@ -130,7 +130,7 @@ th:{
  presets:['633 He-Ne','650 ไดโอดแดง','532 เขียว'],
  optBtn:'ให้ waist อยู่กลางระยะใช้งาน',zeroBtn:'δ = 0 (ไม่เลื่อน)',
  focus:'จุดโฟกัส',benchFoot:(d,m)=>`ระยะ L1–L2 = ${d} mm   ขยาย ${m}×   (แนวตั้งขยายให้เห็นชัด ไม่ตามสเกล)`,
- waistAt:(d,z)=>`waist Ø ${d} mm ที่ ${z} m →`,
+ waistAt:(d,z,x='')=>`waist Ø ${d} mm ที่ ${z} m${x} →`,waistVirt:z=>`waist เสมือน ${z} m ก่อน L2 · บานตั้งแต่ L2`,
  axis:'ระยะจาก L2 (m)',
  cRange:'ขนาน',cWaist:'waist',cLimit:'√2 × Ø คอลลิเมต',cNom:'เส้นประ: ไม่เลื่อน L2 (δ = 0)',
  rows:r=>[
@@ -173,7 +173,8 @@ th:{
   '<b>ผิวเลนส์ไม่เคลือบ</b> สะท้อนประมาณ 4% ต่อผิว เลนส์สองตัวเสียรวมราว 15% ถ้าเคลือบ AR จะเหลือไม่ถึง 2%',
   '<b>ความปลอดภัย</b> ที่จุดโฟกัสหน้า pinhole ความเข้มแสงสูงมาก และบีมขนานยังอันตรายต่อตาในระยะไกล ใส่แว่นตามความยาวคลื่น ทำงานให้บีมต่ำกว่าระดับสายตา และระวังแสงสะท้อนจากเครื่องมือโลหะ',
   '<b>ระยะที่ใช้งานได้จริง</b> สั้นกว่าค่าทางทฤษฎีเสมอ เพราะความแม่นของตำแหน่ง L2 และคุณภาพเลนส์ ใช้ค่าความคลาดเคลื่อนของ L2 ในตารางเป็นตัวบอกว่าต้องใช้ stage ละเอียดแค่ไหน',
-  '<b>จูน waist ให้อยู่กลางระยะใช้งาน</b> ตั้ง L2 ให้บีมขนานก่อน แล้ววัดขนาดบีมที่ใกล้ L2 และที่ปลายระยะใช้งาน ค่อยๆ เลื่อน L2 ออกห่าง pinhole จนขนาดสองจุดเท่ากัน ระยะที่ต้องเลื่อนอยู่ระดับมิลลิเมตร จึงควรวาง L2 บน stage แกน z ที่ปรับละเอียดได้ราว 0.1 mm'],
+  '<b>จูน waist ให้อยู่กลางระยะใช้งาน</b> ตั้ง L2 ให้บีมขนานก่อน แล้ววัดขนาดบีมที่ใกล้ L2 และที่ปลายระยะใช้งาน ค่อยๆ เลื่อน L2 ออกห่าง pinhole จนขนาดสองจุดเท่ากัน ระยะที่ต้องเลื่อนอยู่ระดับมิลลิเมตร จึงควรวาง L2 บน stage แกน z ที่ปรับละเอียดได้ราว 0.1 mm',
+  '<b>นับ δ จากจุดโฟกัสจริง ไม่ใช่จาก L1</b> ถ้า waist ของเลเซอร์ไม่ได้อยู่ห่าง L1 เท่ากับ f₁ จุดโฟกัสจะเลื่อนจากระนาบ f₁ ได้ระดับ 0.1–0.5 mm และความคลาดตามแกนนี้ถูกขยาย (f₂/f₁)² เท่าที่ขาออก ถ้าตั้งระยะ L1–L2 = f₁ + f₂ ด้วยไม้บรรทัด waist ขาออกอาจกลายเป็น waist เสมือนก่อน L2 และบีมบานเร็ว ให้วาง pinhole ตรงจุดที่แสงผ่านมากที่สุด ตั้ง δ = 0 ด้วยการตรวจว่าบีมขนานจริง (เช่น shear plate) แล้วค่อยเลื่อน L2 ตามค่าที่คำนวณ'],
  ex:{laser:'เลเซอร์',optics:'L1 / pinhole / L2',dout:'ขนาดบีมคอลลิเมต',mag:'ขยาย',range:'ระยะที่ยังขนาน (≤ √2 × Ø)',waist:'waist ขาออก',shift:'เลื่อน L2',div:'มุมบานเต็ม',at:'Ø ที่',spot:'จุดโฟกัส / pinhole แนะนำ',trans:'แสงผ่าน',pout:'กำลังขาออก (ไม่รวมผิวเลนส์)',from:'จาก',tol:'ความคลาดตำแหน่ง L2',res:'ผลคำนวณ'}
 },
 en:{
@@ -188,7 +189,7 @@ en:{
  presets:['633 He-Ne','650 red diode','532 green'],
  optBtn:'Put waist mid working distance',zeroBtn:'δ = 0 (no shift)',
  focus:'Focal spot',benchFoot:(d,m)=>`L1–L2 = ${d} mm   magnification ${m}×   (vertical scale exaggerated)`,
- waistAt:(d,z)=>`waist Ø ${d} mm at ${z} m →`,
+ waistAt:(d,z,x='')=>`waist Ø ${d} mm at ${z} m${x} →`,waistVirt:z=>`virtual waist ${z} m before L2 · spreads from L2`,
  axis:'Distance from L2 (m)',
  cRange:'collimated',cWaist:'waist',cLimit:'√2 × collimated Ø',cNom:'dashed: L2 not shifted (δ = 0)',
  rows:r=>[
@@ -231,7 +232,8 @@ en:{
   '<b>Uncoated lens surfaces</b> reflect about 4% each, so two lenses lose about 15% in total. With AR coating the loss drops below 2%.',
   '<b>Safety.</b> The focus in front of the pinhole is very intense, and a collimated beam stays hazardous to the eye at long range. Wear goggles rated for the wavelength, keep the beam below eye level and watch for reflections from metal tools.',
   '<b>Real working range</b> is always shorter than theory because of L2 placement accuracy and lens quality. Use the L2 tolerance in the table to choose how fine a stage you need.',
-  '<b>Tuning the waist to mid working distance.</b> Collimate first, then measure the beam near L2 and at the far end of the working distance. Move L2 away from the pinhole in small steps until both sizes match. The shift is on the millimetre scale, so mount L2 on a z stage with about 0.1 mm resolution.'],
+  '<b>Tuning the waist to mid working distance.</b> Collimate first, then measure the beam near L2 and at the far end of the working distance. Move L2 away from the pinhole in small steps until both sizes match. The shift is on the millimetre scale, so mount L2 on a z stage with about 0.1 mm resolution.',
+  '<b>Count δ from the real focus, not from L1.</b> If the laser waist is not f₁ in front of L1, the focus shifts from the f₁ plane by roughly 0.1–0.5 mm, and this axial error is magnified (f₂/f₁)² times at the output. Setting L1–L2 = f₁ + f₂ with a ruler can turn the output waist into a virtual waist before L2, so the beam spreads quickly. Put the pinhole where transmission is highest, set δ = 0 by checking true collimation (e.g. a shear plate), then shift L2 by the calculated amount.'],
  ex:{laser:'Laser',optics:'L1 / pinhole / L2',dout:'Collimated beam size',mag:'magnification',range:'Collimated range (≤ √2 × Ø)',waist:'Output waist',shift:'L2 shift',div:'Full divergence',at:'Ø at',spot:'Focal spot / recommended pinhole',trans:'transmission',pout:'Output power (excl. lens surfaces)',from:'from',tol:'L2 position tolerance',res:'Results'}
 }};
 let LANG='th';
@@ -323,7 +325,7 @@ function bench(p,r,c,oy=0){
  g+=T_(140,cy-hIn/2-10,'Ø '+fmt(p.din)+' mm',c.ink,o);
  g+=T_((xL2+xEnd)/2,cy-hOut/2-10,'Ø '+fmt(r.dL2)+' mm',c.ink,{font:f,w:600});
  g+=T_(xPH,oy+64,t().focus+' Ø '+fmt(r.spotUm,0)+' µm',c.ink,o);
- if(dz>0.005&&r.zw>0)g+=T_(xEnd,oy+64,t().waistAt(fmt(2*r.w0),fmt(r.zw,2)),c.glass,{font:f,w:600,a:'end'});
+ g+=T_(xEnd,oy+64,r.zw>0?t().waistAt(fmt(2*r.w0),fmt(r.zw,2),Math.abs(dz)<0.005?' (= f₂)':''):t().waistVirt(fmt(-r.zw,2)),c.glass,{font:f,w:600,a:'end'});
  g+=T_(W/2,oy+258,t().benchFoot(+(p.f1+p.f2+dz).toFixed(2),fmt(r.mag)),c.muted,{font:f,size:12});
  return g;
 }
@@ -349,7 +351,8 @@ function chart(p,r,c,oy=0){
  g+=T_((l+W-rt)/2,b+34,t().axis,c.muted,o);
  g+=T_(l-6,Y(Dmax/1.08)+4,'±'+fmt(Dmax/1.08/2)+' mm',c.muted,{font:f,size:11,a:'end'});
  g+=T_(l-6,(tp+b)/2+4,'0',c.muted,{font:f,size:11,a:'end'});
- if(r.zw>0.02*zmax&&r.zw<zmax){const x=X(r.zw);g+=`<line x1="${x}" y1="${Y(r.w0*2)}" x2="${x}" y2="${Y(-r.w0*2)}" style="stroke:${c.ink};stroke-width:1.4"/>`+T_(x,Y(-r.w0*2)+14,t().cWaist+' '+fmt(r.zw,2)+' m · Ø '+fmt(2*r.w0)+' mm',c.ink,{font:f,size:11})}
+ if(r.zw>0&&r.zw<zmax){const x=X(r.zw),near=r.zw<0.12*zmax;g+=`<line x1="${x}" y1="${Y(r.w0*2)}" x2="${x}" y2="${Y(-r.w0*2)}" style="stroke:${c.ink};stroke-width:1.4"/>`+T_(near?x+4:x,Y(-r.w0*2)+14,t().cWaist+' '+fmt(r.zw,2)+' m'+(shifted?'':' (= f₂)')+' · Ø '+fmt(2*r.w0)+' mm',c.ink,{font:f,size:11,a:near?'start':'middle'})}
+ else if(r.zw<=0)g+=T_(l+6,Y(-r.w0*2)+14,t().waistVirt(fmt(-r.zw,2)),c.ink,{font:f,size:11,a:'start'});
  if(r.range>0&&r.range<zmax){const x=X(r.range);g+=`<line x1="${x}" y1="${tp}" x2="${x}" y2="${b}" style="stroke:${c.glass};stroke-width:1.2;stroke-dasharray:5 4"/>`+T_(x+4,tp+12,t().cRange+' '+fmt(r.range,1)+' m',c.glass,{font:f,size:12,a:'start'})}
  const xL=X(p.L);g+=`<line x1="${xL}" y1="${tp}" x2="${xL}" y2="${b}" style="stroke:${c.ink};stroke-width:1.4"/>`+T_(xL-4,b-8,'L '+p.L+' m: Ø '+fmt(r.DL)+' mm',c.ink,{font:f,size:12,a:'end'});
  if(shifted)g+=T_(l+6,tp+12,t().cNom,c.muted,{font:f,size:11,a:'start'});

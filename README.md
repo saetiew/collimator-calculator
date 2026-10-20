@@ -13,6 +13,6 @@ Collimated beam diameter, collimated range (until the beam exceeds √2 × colli
 lens clipping, output power, L2/pinhole position tolerance, the f2 needed for a given working distance, and the L2 shift that puts the waist mid working distance.
 
 ## Assumptions
-Gaussian beam with M² scaling; thin-lens Gaussian transformation at L2 (output waist at f2 after L2 for δ = 0, moves downstream for δ > 0); recommended pinhole d ≈ λ f1 / (D_in/2) ≈ 1.57 × focal spot.
+Gaussian beam with M² scaling; thin-lens Gaussian transformation at L2 (output waist at f2 after L2 for δ = 0, moves downstream for δ > 0; δ is counted from the real focus at the pinhole); recommended pinhole d ≈ λ f1 / (D_in/2) ≈ 1.57 × focal spot.
 
 Single self-contained `index.html` — no build step.
